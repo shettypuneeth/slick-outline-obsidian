@@ -1,0 +1,9 @@
+{
+  "id": "outliner-obsidian",
+  "name": "Outliner",
+  "version": "0.1.0",
+  "minAppVersion": "1.13.0",
+  "description": "Navigate note headings with a floating glass outline and reading-progress ring.",
+  "author": "Puneeth Shetty",
+  "isDesktopOnly": true
+}
