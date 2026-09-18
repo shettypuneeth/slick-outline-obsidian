@@ -60,7 +60,9 @@ export function OutlineList({ expanded, headings, active, shellRef, onNavigate }
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => onNavigate(heading)}
               >
-                <span>{heading.label}</span>
+                <span style={{ animationDelay: `${90 + Math.min(index, 10) * 25}ms` }}>
+                  {heading.label}
+                </span>
               </button>
             </li>
           ))}

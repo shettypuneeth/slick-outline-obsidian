@@ -23,12 +23,16 @@ not supported; the control hides until you return to a supported mode.
 
 - H1 and H2 headings form a flat, scrollable list.
 - The current section and active rail marker share the brighter text accent.
-  The remaining rail uses a visible neutral tone; inactive headings stay faint.
+  The remaining rail uses a visible neutral tone; inactive headings stay faint
+  with a light (300) font weight.
+- Heading labels slide in from the left and fade in with a short stagger when
+  the panel opens.
 - A single active marker glides between headings with a subtle CSS overshoot,
   resizing to match wrapped labels.
 - Heading labels wrap fully without clipping or a line limit.
 - The collapsed ring sits outside the glass button and tracks document
-  scrolling clockwise from the top.
+  scrolling clockwise from the top. The collapsed button has no visible border
+  or shadow; its icon and progress ring fade back in as the panel finishes closing.
 - The panel stays open during scrolling and heading navigation.
 - Heading labels and reading time refresh when the panel reopens, not on
   every edit. If a heading-free note gains headings, toggle the command off
