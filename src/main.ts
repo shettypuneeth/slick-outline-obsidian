@@ -2,14 +2,17 @@ import { MarkdownView, Plugin, type WorkspaceLeaf } from 'obsidian';
 import { EditorBridge } from './outliner/editorBridge';
 import { OutlinerView } from '@views/OutlinerView';
 import { ReadingHeadings } from './outliner/readingHeadings';
+import { DEFAULT_SETTINGS, OutlinerSettingTab, readSettings, type OutlinerPlacement } from './settings';
 
 export default class OutlinerPlugin extends Plugin {
+  settings = { ...DEFAULT_SETTINGS };
   private readonly panes = new Map<WorkspaceLeaf, OutlinerView>();
   private bridge!: EditorBridge;
   private readingHeadings!: ReadingHeadings;
   private unloading = false;
 
-  onload(): void {
+  async onload(): Promise<void> {
+    this.settings = readSettings(await this.loadData());
     this.readingHeadings = new ReadingHeadings(this.app);
     this.bridge = new EditorBridge((update) => {
       if (this.unloading) return;
@@ -22,6 +25,7 @@ export default class OutlinerPlugin extends Plugin {
     this.registerMarkdownPostProcessor((element, context) => {
       this.readingHeadings.process(element, context);
     });
+    this.addSettingTab(new OutlinerSettingTab(this));
     this.addCommand({
       id: 'show-outliner',
       name: 'Show outliner',
@@ -37,7 +41,9 @@ export default class OutlinerPlugin extends Plugin {
             existing.destroy();
             this.panes.delete(view.leaf);
           } else {
-            this.panes.set(view.leaf, new OutlinerView(view, this.bridge, this.readingHeadings));
+            this.panes.set(view.leaf, new OutlinerView(
+              view, this.bridge, this.readingHeadings, () => this.settings.placement,
+            ));
           }
         }
         return true;
@@ -51,6 +57,13 @@ export default class OutlinerPlugin extends Plugin {
         if (pane.view.file === file) pane.metadataChanged();
       }
     }));
+  }
+
+  async setPlacement(placement: OutlinerPlacement): Promise<void> {
+    const settings = { ...this.settings, placement };
+    await this.saveData(settings);
+    this.settings = settings;
+    this.syncPanes();
   }
 
   private syncPanes(): void {
@@ -69,6 +82,6 @@ export default class OutlinerPlugin extends Plugin {
     this.unloading = true;
     for (const pane of this.panes.values()) pane.destroy();
     this.panes.clear();
-    this.bridge.clear();
+    this.bridge?.clear();
   }
 }

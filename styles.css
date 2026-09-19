@@ -12,6 +12,7 @@
   --outliner-edge: var(--background-modifier-border);
   --outliner-accent: var(--interactive-accent);
   --outliner-inactive: color-mix(in srgb, var(--text-muted) 80%, var(--background-primary));
+  --outliner-collapse-duration: 300ms;
 }
 
 .outliner-host[hidden] {
@@ -19,7 +20,10 @@
 }
 
 .outliner-shell {
-  position: relative;
+  --outliner-expanded-height: min(var(--outliner-height, 420px), var(--outliner-natural-height, 420px));
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 36px;
   height: 36px;
   overflow: hidden;
@@ -32,11 +36,23 @@
   pointer-events: auto;
   isolation: isolate;
   transition:
-    width 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    height 260ms cubic-bezier(0.2, 0.8, 0.2, 1) 25ms,
-    border-radius 260ms ease,
-    border-color 260ms ease,
-    box-shadow 260ms ease;
+    width var(--outliner-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
+    height var(--outliner-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius var(--outliner-collapse-duration) ease,
+    border-color 120ms ease 180ms,
+    box-shadow 120ms ease 180ms;
+}
+
+.outliner-host[data-placement$="-right"] .outliner-shell,
+.outliner-host[data-placement$="-right"] .outliner-panel {
+  left: auto;
+  right: 0;
+}
+
+.outliner-host[data-placement^="bottom-"] .outliner-shell,
+.outliner-host[data-placement^="bottom-"] .outliner-panel {
+  top: auto;
+  bottom: 0;
 }
 
 @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
@@ -53,12 +69,18 @@
 
 .outliner-shell[data-expanded="true"] {
   width: var(--outliner-width, 280px);
-  height: min(var(--outliner-height, 420px), var(--outliner-natural-height, 420px));
+  height: var(--outliner-expanded-height);
   border-radius: 10px;
   border-color: var(--outliner-edge);
   box-shadow:
     0 12px 36px var(--background-modifier-box-shadow),
     inset 0 1px 0 color-mix(in srgb, var(--text-normal) 9%, transparent);
+  transition:
+    width 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    height 260ms cubic-bezier(0.2, 0.8, 0.2, 1) 25ms,
+    border-radius 260ms ease,
+    border-color 260ms ease,
+    box-shadow 260ms ease;
 }
 
 .outliner-host button {
@@ -103,7 +125,8 @@
   height: 36px;
   border-radius: 50%;
   color: var(--text-muted);
-  transition: opacity 220ms ease 240ms, color 120ms ease;
+  opacity: 1;
+  transition: opacity 0s var(--outliner-collapse-duration), color 120ms ease;
 }
 
 .outliner-trigger:hover {
@@ -118,7 +141,7 @@
 .outliner-shell[data-expanded="true"] .outliner-trigger {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 80ms ease, color 120ms ease;
+  transition: opacity 0s, color 120ms ease;
 }
 
 .outliner-progress {
@@ -133,7 +156,7 @@
   pointer-events: none;
   opacity: 1;
   visibility: visible;
-  transition: opacity 220ms ease 240ms, visibility 0s;
+  transition: opacity 320ms ease calc(var(--outliner-collapse-duration) + 80ms), visibility 0s;
 }
 
 .outliner-progress[data-disabled="true"] {
@@ -157,23 +180,25 @@
 }
 
 .outliner-panel {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  width: var(--outliner-width, 280px);
+  /* Keep auto-scroll measurements stable while the shell animates around the panel. */
+  height: calc(var(--outliner-expanded-height) - 2px);
+  width: calc(var(--outliner-width, 280px) - 2px);
   padding: 12px 12px 16px;
   box-sizing: border-box;
-  opacity: 0;
   visibility: hidden;
-  transform: translateY(6px);
-  transition: opacity 90ms ease, transform 180ms ease, visibility 0s 180ms;
+  pointer-events: none;
+  transition: visibility 0s var(--outliner-collapse-duration);
 }
 
 .outliner-shell[data-expanded="true"] .outliner-panel {
-  opacity: 1;
   visibility: visible;
-  transform: translateY(0);
-  transition: opacity 160ms ease 90ms, transform 200ms ease 60ms, visibility 0s;
+  pointer-events: auto;
+  transition: visibility 0s;
 }
 
 .outliner-header {
@@ -299,7 +324,7 @@
 }
 
 .outliner-shell[data-expanded="true"] .outliner-heading > span {
-  animation: outliner-heading-enter 260ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: outliner-heading-enter 300ms cubic-bezier(0, 0, 0.3, 1) both;
 }
 
 @keyframes outliner-heading-enter {
@@ -327,6 +352,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .outliner-shell,
+  .outliner-shell[data-expanded="true"],
+  .outliner-panel,
+  .outliner-shell[data-expanded="true"] .outliner-panel,
   .outliner-progress,
   .outliner-progress[data-expanded="true"],
   .outliner-progress__fill,
@@ -338,11 +366,5 @@
 
   .outliner-shell[data-expanded="true"] .outliner-heading > span {
     animation: none;
-  }
-
-  .outliner-panel,
-  .outliner-shell[data-expanded="true"] .outliner-panel {
-    transform: none;
-    transition: opacity 80ms ease;
   }
 }

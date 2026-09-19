@@ -21,19 +21,34 @@ not supported; the control hides until you return to a supported mode.
 
 ## Behavior
 
+- In **Settings -> Outliner -> Placement**, choose **Top left** (default),
+  **Top right**, **Bottom left**, or **Bottom right**. The choice is saved and
+  applies immediately to all enabled panes.
+- The outliner sits 36px inside the selected side of the pane. Top placements
+  align with Properties (or the note title when Properties is hidden); bottom
+  placements sit at least 48px above the pane's bottom edge and leave 24px above
+  an overlapping status bar. It stays fixed while scrolling.
+- The panel expands inward from the selected corner and fits that side's
+  empty gutter at 200-280px wide, leaving a 24px gap
+  before the note. Narrow gutters use a compact, up-to-240px overlay instead.
+- Panel contents stay anchored to the selected corner while the shell expands
+  or collapses, avoiding extra movement at bottom and right placements.
 - H1 and H2 headings form a flat, scrollable list.
 - The current section and active rail marker share the brighter text accent.
   The remaining rail uses a visible neutral tone; inactive headings stay faint
   with a light (300) font weight.
-- Heading labels slide in from the left and fade in with a short stagger when
-  the panel opens.
+- Heading labels slide in from the left and fade in over 300ms, with a 35ms
+  stagger when the panel opens. Stagger delays are capped for long outlines.
 - A single active marker glides between headings with a subtle CSS overshoot,
   resizing to match wrapped labels.
 - Heading labels wrap fully without clipping or a line limit.
 - The collapsed ring sits outside the glass button and tracks document
   scrolling clockwise from the top. The collapsed button has no visible border
-  or shadow; its icon and progress ring fade back in as the panel finishes closing.
+  or shadow. Only the progress ring fades back in after the panel finishes closing;
+  the button and container do not fade.
 - The panel stays open during scrolling and heading navigation.
+- Closing clips the contents inside a 300ms shrinking shell. The border and
+  shadow fade only near the end, before the progress ring returns.
 - Heading labels and reading time refresh when the panel reopens, not on
   every edit. If a heading-free note gains headings, toggle the command off
   and on to refresh its disabled control.
@@ -44,7 +59,7 @@ not supported; the control hides until you return to a supported mode.
 - The glass background uses theme colors, blur, and translucency, with a
   solid-background fallback when backdrop blur is unavailable.
 
-Version 1 is desktop-only and has no settings tab.
+Version 1 is desktop-only.
 
 ## Development
 

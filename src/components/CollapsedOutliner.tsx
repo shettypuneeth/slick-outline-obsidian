@@ -25,7 +25,6 @@ export const CollapsedOutliner = forwardRef<HTMLButtonElement, CollapsedOutliner
         aria-expanded={expanded}
         aria-hidden={expanded}
         tabIndex={expanded ? -1 : 0}
-        title={empty ? 'No H1 or H2 headings' : `Open document outline (${percentage}%)`}
         onClick={() => { if (!empty) onExpand(); }}
       >
         <ObsidianIcon name="list" />

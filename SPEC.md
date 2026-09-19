@@ -30,8 +30,13 @@ H1 and H2 headings.
 ### Collapsed state
 
 - Display a 36 px circular control using Obsidian's Lucide `list` icon.
-- Place it as a floating overlay near the top-left of the Markdown editor,
-  below the Properties area.
+- Offer a persisted Placement setting: Top left (default), Top right,
+  Bottom left, or Bottom right. Apply changes to all enabled panes immediately.
+- Use the selected side's gutter with a 36 px side inset. Top placements align
+  with Properties, the inline title when Properties is hidden, or the viewport
+  top with a 16 px inset when both are hidden. Bottom placements use at least a
+  48 px inset from the pane's bottom edge and leave 24 px above an overlapping
+  status bar.
 - Keep its position fixed relative to the editor viewport while the document
   scrolls.
 - Draw a 2.5 px circular progress track outside the 36 px glass control, in a
@@ -56,8 +61,10 @@ H1 and H2 headings.
 ### Expanded state
 
 - Morph the collapsed circle into a floating panel.
-- Preserve the top-left anchor and grow down and to the right.
-- Use a width of 280 px.
+- Preserve the selected corner anchor and expand inward.
+- Fit the available gutter at 200-280 px wide with a 24 px gap before the
+  document. When the gutter cannot fit 200 px, use an overlay up to 240 px wide,
+  constrained to the pane.
 - Use a maximum height of 420 px.
 - Overlay the document without changing the editor layout.
 - Use a glassmorphic background: translucent Obsidian theme colors, backdrop
@@ -186,15 +193,19 @@ Mount one overlay for each enabled Markdown pane:
 
 - Anchor it to the pane's Markdown view container rather than the global
   workspace.
-- Align it near the left side of the note content.
-- Calculate a top offset beneath the Properties area when Properties is
-  present, using its document position so enabling or reloading the plugin
-  halfway through a note does not reset the control above Properties.
+- Place it in the gutter on the selected side, using the saved corner setting.
+- For top corners, align with the top of Properties using its document
+  position so enabling or reloading halfway through a note preserves the anchor.
+  Fall back to the inline title, then the viewport top.
+- For bottom corners, anchor at least 48 px above the pane's bottom edge,
+  reserving an additional 24 px gap above an overlapping status bar.
 - Keep the resulting offset fixed relative to the editor viewport while
   scrolling.
-- Prevent the panel from extending beyond the pane's right or bottom edges.
-- Preserve down-right expansion and constrain the panel dimensions instead of
-  changing its opening direction.
+- Prevent the panel from extending beyond any edge of the pane.
+- Expand inward from the selected corner: right or left horizontally, and
+  down or up vertically. Keep the collapsed control's corner fixed during the morph.
+- Anchor the inner panel to the same corner so resizing the shell does not
+  move its contents.
 
 ## Accessibility
 
@@ -222,13 +233,14 @@ plugin:
 - Obsidian CSS variables instead of hard-coded theme colors.
 - Theme-aware frosted-glass surfaces for both the collapsed control and
   expanded panel.
-- No settings tab or persisted plugin configuration in version 1.
+- Use Obsidian's settings tab and plugin data APIs to persist placement.
 
 Source structure:
 
 ```text
 src/
   main.ts
+  settings.ts
   views/
     OutlinerView.tsx
   outliner/

@@ -8,6 +8,7 @@ import type { EditorBridge } from '../outliner/editorBridge';
 import type { ReadingHeadings } from '../outliner/readingHeadings';
 import { ProgressStore } from '../outliner/ProgressStore';
 import { HeadingNavigator } from '../outliner/HeadingNavigator';
+import type { OutlinerPlacement } from '../settings';
 
 type OwnerWindow = Window & typeof globalThis;
 
@@ -29,9 +30,6 @@ export class OutlinerView {
   private content: HTMLElement | null = null;
   private frame: number | null = null;
   private readonly navigator: HeadingNavigator;
-  private initialTop: number | null = null;
-  private anchorProperties: HTMLElement | null = null;
-  private propertiesHeight = 0;
   private active = -1;
   private dirtyRender = true;
   private refreshOnModeReady = false;
@@ -40,6 +38,7 @@ export class OutlinerView {
     readonly view: MarkdownView,
     private readonly bridge: EditorBridge,
     private readonly readingHeadings: ReadingHeadings,
+    private readonly getPlacement: () => OutlinerPlacement,
   ) {
     const ownerWindow = view.contentEl.ownerDocument.defaultView;
     if (!ownerWindow) throw new Error('Outliner requires an attached editor window.');
@@ -50,6 +49,9 @@ export class OutlinerView {
     this.root = createRoot(this.host);
     this.resizeObserver = new this.win.ResizeObserver(this.schedule);
     this.resizeObserver.observe(view.contentEl);
+    view.contentEl.ownerDocument.querySelectorAll('.status-bar').forEach((statusBar) => {
+      this.resizeObserver.observe(statusBar);
+    });
     this.mutationObserver = new this.win.MutationObserver((records) => {
       if (records.some((record) => !this.host.contains(record.target))) this.schedule();
     });
@@ -74,7 +76,6 @@ export class OutlinerView {
       this.filePath = path;
       this.mode = mode;
       if (fileChanged) this.expanded = false;
-      this.initialTop = null;
       this.refreshOnModeReady = mode !== 'unsupported';
       this.dirtyRender = true;
     }
@@ -204,19 +205,30 @@ export class OutlinerView {
     if (paneRect.width < 36 || paneRect.height < 36) return;
     const properties = scroller.querySelector<HTMLElement>('.metadata-container');
     const propertiesRect = properties?.getBoundingClientRect();
-    const propertiesHeight = propertiesRect?.height ?? 0;
-    if (this.initialTop === null || properties !== this.anchorProperties ||
-      Math.abs(propertiesHeight - this.propertiesHeight) > 1) {
-      this.anchorProperties = properties;
-      this.propertiesHeight = propertiesHeight;
-      this.initialTop = propertiesRect && propertiesRect.height > 0
-        ? propertiesRect.bottom + scroller.scrollTop - paneRect.top + 12
-        : scrollRect.top - paneRect.top + 16;
-    }
+    const titleRect = scroller.querySelector<HTMLElement>('.inline-title')?.getBoundingClientRect();
+    const anchorRect = propertiesRect && propertiesRect.height > 0
+      ? propertiesRect
+      : titleRect && titleRect.height > 0 ? titleRect : null;
+    // Undo document scrolling so the Properties/title anchor stays fixed in the pane.
+    const top = anchorRect
+      ? anchorRect.top + scroller.scrollTop - paneRect.top
+      : scrollRect.top - paneRect.top + 16;
+    const contentLeft = Math.min(contentRect.left, anchorRect?.left ?? contentRect.left);
+    const contentRight = Math.max(contentRect.right, anchorRect?.right ?? contentRect.right);
+    const placement = this.getPlacement();
+    const bottomObstruction = Array.from(
+      this.view.contentEl.ownerDocument.querySelectorAll('.status-bar'),
+    ).reduce((overlap, statusBar) => {
+      const rect = statusBar.getBoundingClientRect();
+      return rect.height > 0 && rect.left < paneRect.right && rect.right > paneRect.left &&
+        rect.top < paneRect.bottom && rect.bottom >= paneRect.bottom - 1
+        ? Math.max(overlap, paneRect.bottom - rect.top) : overlap;
+    }, 0);
     const geometry = overlayGeometry(
       paneRect.width, paneRect.height,
-      contentRect.left - paneRect.left + 12, this.initialTop,
+      contentLeft - paneRect.left, contentRight - paneRect.left, top, placement, bottomObstruction,
     );
+    this.host.dataset.placement = placement;
     this.host.style.left = `${geometry.left}px`;
     this.host.style.top = `${geometry.top}px`;
     this.host.style.setProperty('--outliner-width', `${geometry.width}px`);

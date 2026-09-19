@@ -17,8 +17,12 @@ export function ActiveRail({ expanded, active, headings }: ActiveRailProps) {
     const content = rail.closest<HTMLElement>('.outliner-list-content');
     const item = content?.querySelector<HTMLElement>('[aria-current="location"]');
     const win = rail.ownerDocument.defaultView;
-    if (!expanded || !content || !item || !win) {
+    if (!content || !item || !win) {
       rail.hidden = true;
+      positioned.current = false;
+      return;
+    }
+    if (!expanded) {
       positioned.current = false;
       return;
     }

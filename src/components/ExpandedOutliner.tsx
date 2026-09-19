@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type RefObject } from 'react';
+import { useId, useLayoutEffect, useRef, type RefObject } from 'react';
 import type { OutlineHeading } from '../outliner/model';
 import { ObsidianIcon } from './ObsidianIcon';
 import { OutlineList } from './OutlineList';
@@ -18,6 +18,7 @@ export function ExpandedOutliner({
   expanded, headings, minutes, active, shellRef, closeRef, onCollapse, onNavigate,
 }: ExpandedOutlinerProps) {
   const panelRef = useRef<HTMLElement>(null);
+  const labelId = useId();
 
   useLayoutEffect(() => {
     panelRef.current?.toggleAttribute('inert', !expanded);
@@ -45,7 +46,8 @@ export function ExpandedOutliner({
   }, [shellRef]);
 
   return (
-    <nav ref={panelRef} className="outliner-panel" aria-label="Document outline" aria-hidden={!expanded}>
+    <nav ref={panelRef} className="outliner-panel" aria-labelledby={labelId} aria-hidden={!expanded}>
+      <span id={labelId} hidden>Document outline</span>
       <header className="outliner-header">
         <span className="outliner-reading-time">~{minutes} min read</span>
         <button
@@ -53,7 +55,6 @@ export function ExpandedOutliner({
           type="button"
           className="outliner-close"
           aria-label="Collapse document outline"
-          title="Collapse document outline"
           tabIndex={expanded ? 0 : -1}
           onClick={onCollapse}
         >
