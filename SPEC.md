@@ -52,11 +52,17 @@ H1 and H2 headings.
 - Clamp progress between `0` and `1`.
 - For a document without scrollable overflow, show a complete progress ring.
 - Clicking the control expands the outliner.
+- Dragging the collapsed circle moves it within the current pane after a
+  6 px threshold. Dropping keeps it collapsed and saves a relative position.
+- Within 12 px of a safe edge, preview a snap target and snap on release.
+- Escape, pointer cancellation, focus loss, pane closure, and plugin unload
+  cancel a drag. No keyboard movement mode is included in version 1.
 - If the note has no H1 or H2 headings:
   - Keep the control visible.
   - Display it in a disabled, muted state.
   - Show the tooltip **No H1 or H2 headings**.
   - Clicking it does nothing.
+  - Dragging it still changes the position.
 
 ### Expanded state
 
@@ -110,7 +116,10 @@ Display reading time as:
 
 Calculation rules:
 
-- Use 200 words per minute.
+- Use the configurable Reading speed setting, defaulting to 200 words per minute.
+- Accept positive whole-number speeds; save on Enter or leaving the settings field.
+- Update estimates in enabled panes when speed changes, retaining their heading snapshots.
+- Reset to defaults restores both top-left placement and the default reading speed of 200 words per minute.
 - Round upward to the next whole minute.
 - Exclude YAML frontmatter.
 - Exclude fenced code blocks.
@@ -206,6 +215,17 @@ Mount one overlay for each enabled Markdown pane:
   down or up vertically. Keep the collapsed control's corner fixed during the morph.
 - Anchor the inner panel to the same corner so resizing the shell does not
   move its contents.
+- Custom positions use normalized coordinates within the safe pane bounds,
+  including room for the ring and status bar. Resizing clamps the rendered
+  position without overwriting the saved preference.
+- Keep movement local to the dragged pane until drop; then apply the saved
+  relative position to all enabled panes. Choose an expansion direction with
+  available room and keep it fixed during the open/close animation.
+- Keep the four Placement presets. Indicate a dragged position as Custom
+  position. Choosing a preset clears the custom position; Reset to defaults
+  restores Top left.
+- Persist once per completed drag, not per pointer movement. Surface save
+  failures and restore the previous position.
 
 ## Accessibility
 
@@ -241,6 +261,8 @@ Source structure:
 src/
   main.ts
   settings.ts
+  utils/
+    draggable.ts
   views/
     OutlinerView.tsx
   outliner/

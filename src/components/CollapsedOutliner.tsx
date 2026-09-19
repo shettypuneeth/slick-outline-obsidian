@@ -14,13 +14,14 @@ export const CollapsedOutliner = forwardRef<HTMLButtonElement, CollapsedOutliner
     const progress = useSyncExternalStore(store.subscribe, store.getSnapshot);
     const percentage = Math.round(progress * 100);
 
+    // Keep the button enabled for dragging even when an empty outline cannot expand.
     return (
       <button
         ref={ref}
         className="outliner-trigger"
         type="button"
         aria-label={empty ? 'No H1 or H2 headings' : 'Open document outline'}
-        aria-description={`${percentage}% through document`}
+        aria-description={`${percentage}% through document. Drag to reposition.`}
         aria-disabled={empty}
         aria-expanded={expanded}
         aria-hidden={expanded}

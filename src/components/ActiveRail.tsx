@@ -9,40 +9,43 @@ interface ActiveRailProps {
 
 export function ActiveRail({ expanded, active, headings }: ActiveRailProps) {
   const railRef = useRef<HTMLDivElement>(null);
-  const positioned = useRef(false);
+  const hasPositionedRail = useRef(false);
 
   useLayoutEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
     const content = rail.closest<HTMLElement>('.outliner-list-content');
-    const item = content?.querySelector<HTMLElement>('[aria-current="location"]');
+    const activeItem = content?.querySelector<HTMLElement>('[aria-current="location"]');
     const win = rail.ownerDocument.defaultView;
-    if (!content || !item || !win) {
+    if (!content || !activeItem || !win) {
       rail.hidden = true;
-      positioned.current = false;
+      hasPositionedRail.current = false;
       return;
     }
     if (!expanded) {
-      positioned.current = false;
+      hasPositionedRail.current = false;
       return;
     }
 
     const measure = () => {
-      const itemRect = item.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
       if (itemRect.height === 0) return;
+
       // Content-relative coordinates stay stable while the outline itself scrolls.
       const top = itemRect.top - content.getBoundingClientRect().top;
-      rail.dataset.animated = String(positioned.current);
+
+      // Place the rail immediately on open; animate only subsequent heading changes.
+      rail.dataset.animated = String(hasPositionedRail.current);
       rail.style.transform = `translateY(${top}px)`;
       rail.style.height = `${itemRect.height}px`;
       rail.hidden = false;
-      positioned.current = true;
+      hasPositionedRail.current = true;
     };
 
     measure();
     const observer = new win.ResizeObserver(measure);
     observer.observe(content);
-    observer.observe(item);
+    observer.observe(activeItem);
     return () => observer.disconnect();
   }, [expanded, active, headings]);
 

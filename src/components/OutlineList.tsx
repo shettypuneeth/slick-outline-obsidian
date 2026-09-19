@@ -15,27 +15,33 @@ export function OutlineList({ expanded, headings, active, shellRef, onNavigate }
   const previouslyExpanded = useRef(false);
 
   useLayoutEffect(() => {
+
+    // Reveal the initial active heading immediately rather than scrolling during expansion.
     const animateScroll = expanded && previouslyExpanded.current;
     previouslyExpanded.current = expanded;
     const revealActive = () => {
       const list = listRef.current;
-      const item = list?.querySelector<HTMLElement>('[aria-current="location"]');
-      if (!list || !item || !expanded) return;
+      const activeItem = list?.querySelector<HTMLElement>('[aria-current="location"]');
+      if (!list || !activeItem || !expanded) return;
+
       const listRect = list.getBoundingClientRect();
-      const itemRect = item.getBoundingClientRect();
-      const delta = itemRect.top < listRect.top
+      const itemRect = activeItem.getBoundingClientRect();
+      const scrollDelta = itemRect.top < listRect.top
         ? itemRect.top - listRect.top
         : Math.max(0, itemRect.bottom - listRect.bottom);
-      if (delta === 0) return;
+      if (scrollDelta === 0) return;
+
       const reducedMotion = list.ownerDocument.defaultView
         ?.matchMedia('(prefers-reduced-motion: reduce)').matches;
       list.scrollTo({
-        top: list.scrollTop + delta,
+        top: list.scrollTop + scrollDelta,
         behavior: animateScroll && !reducedMotion ? 'smooth' : 'instant',
       });
     };
     const shell = shellRef.current;
     const onTransitionEnd = (event: TransitionEvent) => {
+
+      // Recheck visibility once the shell reaches its final size.
       if (event.target === shell && (event.propertyName === 'height' || event.propertyName === 'width')) {
         revealActive();
       }

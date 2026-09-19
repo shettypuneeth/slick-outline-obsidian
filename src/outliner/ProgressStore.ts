@@ -1,3 +1,4 @@
+/** Publishes scroll progress to subscribed controls without re-rendering the entire heading list. */
 export class ProgressStore {
   private value = 0;
   private readonly listeners = new Set<() => void>();

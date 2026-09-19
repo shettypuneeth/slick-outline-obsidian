@@ -21,9 +21,22 @@ not supported; the control hides until you return to a supported mode.
 
 ## Behavior
 
+- In **Settings -> Outliner -> Reading speed**, set a positive whole number of
+  words per minute (default **200**). Press Enter or leave the field to save.
+  Reading-time estimates update in enabled panes without reopening the outline.
 - In **Settings -> Outliner -> Placement**, choose **Top left** (default),
   **Top right**, **Bottom left**, or **Bottom right**. The choice is saved and
   applies immediately to all enabled panes.
+- Drag the collapsed circle to choose a custom position inside its pane.
+  A small movement threshold keeps ordinary clicks working; releasing a drag
+  never opens the panel. Near an edge, a dashed circle previews the snap target.
+- Custom positions are remembered proportionally across window sizes and
+  applied to other enabled panes after dropping. The Placement dropdown shows
+  **Custom position**; choosing a corner replaces it. **Reset to defaults**
+  clears the custom position and restores **Top left** and **200 words per minute**.
+- Press Escape during a drag to cancel. Expanded panels cannot be dragged;
+  dragging still works when a note has no headings. Keyboard movement is not
+  included in version 1.
 - The outliner sits 36px inside the selected side of the pane. Top placements
   align with Properties (or the note title when Properties is hidden); bottom
   placements sit at least 48px above the pane's bottom edge and leave 24px above
@@ -31,6 +44,8 @@ not supported; the control hides until you return to a supported mode.
 - The panel expands inward from the selected corner and fits that side's
   empty gutter at 200-280px wide, leaving a 24px gap
   before the note. Narrow gutters use a compact, up-to-240px overlay instead.
+- At custom positions the panel opens toward the available space, without
+  moving the circle or extending past the pane and status-bar clearance.
 - Panel contents stay anchored to the selected corner while the shell expands
   or collapses, avoiding extra movement at bottom and right placements.
 - H1 and H2 headings form a flat, scrollable list.
@@ -82,6 +97,9 @@ The project follows Chronicle's React, TypeScript, and esbuild structure.
 heading list, and shared Obsidian icon component. `src/outliner/` contains
 heading extraction, editor integration, geometry, progress state, and
 navigation. The `@views/*` and `@components/*` aliases match Chronicle.
+`src/utils/draggable.ts` owns reusable pointer gestures, capture, cancellation,
+and click suppression. It reports movement only; pane positioning remains
+owned by `OutlinerView` and the pure geometry helpers.
 
 CodeMirror integration uses an editor extension and source-position anchors
 instead of depending on rendered Live Preview headings, which are virtualized.

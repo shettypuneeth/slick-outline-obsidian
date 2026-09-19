@@ -18,9 +18,13 @@ export function ExpandedOutliner({
   expanded, headings, minutes, active, shellRef, closeRef, onCollapse, onNavigate,
 }: ExpandedOutlinerProps) {
   const panelRef = useRef<HTMLElement>(null);
+
+  // aria-labelledby avoids Obsidian's automatic hover tooltip for aria-label.
   const labelId = useId();
 
   useLayoutEffect(() => {
+
+    // Keep contents visible during collapse, but remove them from interaction immediately.
     panelRef.current?.toggleAttribute('inert', !expanded);
   }, [expanded]);
 
@@ -31,12 +35,14 @@ export function ExpandedOutliner({
     const win = panel?.ownerDocument.defaultView;
     if (!panel || !list || !header || !win) return;
     const resize = () => {
-      const style = win.getComputedStyle(panel);
+      const panelStyle = win.getComputedStyle(panel);
       const headerStyle = win.getComputedStyle(header);
-      const height = list.getBoundingClientRect().height + header.getBoundingClientRect().height +
-        parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) +
+
+      // Measure the full contents, not the animated shell; include its two 1px borders.
+      const naturalHeight = list.getBoundingClientRect().height + header.getBoundingClientRect().height +
+        parseFloat(panelStyle.paddingTop) + parseFloat(panelStyle.paddingBottom) +
         parseFloat(headerStyle.marginBottom) + 2;
-      shellRef.current?.style.setProperty('--outliner-natural-height', `${height}px`);
+      shellRef.current?.style.setProperty('--outliner-natural-height', `${naturalHeight}px`);
     };
     const observer = new win.ResizeObserver(resize);
     observer.observe(list);

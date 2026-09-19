@@ -11,6 +11,7 @@ export interface OutlinerProps {
   minutes: number;
   active: number;
   progress: ProgressStore;
+  bindTrigger: (element: HTMLButtonElement) => () => void;
   onExpand: () => void;
   onCollapse: () => void;
   onNavigate: (heading: OutlineHeading) => void;
@@ -18,9 +19,15 @@ export interface OutlinerProps {
 
 export function OutlinerApp(props: OutlinerProps) {
   const { expanded, headings, minutes, active, progress } = props;
+
   const triggerRef = useRef<HTMLButtonElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  useLayoutEffect(() => {
+    const trigger = triggerRef.current;
+    return trigger ? props.bindTrigger(trigger) : undefined;
+  }, [props.bindTrigger]);
 
   useLayoutEffect(() => {
     if (expanded && triggerRef.current?.ownerDocument.activeElement === triggerRef.current) {

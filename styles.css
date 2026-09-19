@@ -19,6 +19,21 @@
   display: none;
 }
 
+.outliner-drop-preview {
+  position: absolute;
+  z-index: 16;
+  width: 42px;
+  height: 42px;
+  border: 1px dashed var(--interactive-accent);
+  border-radius: 50%;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.outliner-drop-preview[hidden] {
+  display: none;
+}
+
 .outliner-shell {
   --outliner-expanded-height: min(var(--outliner-height, 420px), var(--outliner-natural-height, 420px));
   position: absolute;
@@ -35,6 +50,8 @@
   box-shadow: none;
   pointer-events: auto;
   isolation: isolate;
+
+  /* Fade the edge only near the end of collapse, leaving no halo around the circle. */
   transition:
     width var(--outliner-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
     height var(--outliner-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
@@ -43,6 +60,7 @@
     box-shadow 120ms ease 180ms;
 }
 
+/* Anchor contents with the shell so bottom/right expansion does not slide the text. */
 .outliner-host[data-placement$="-right"] .outliner-shell,
 .outliner-host[data-placement$="-right"] .outliner-panel {
   left: auto;
@@ -126,15 +144,23 @@
   border-radius: 50%;
   color: var(--text-muted);
   opacity: 1;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+
+  /* Restore the icon after collapse; only the surrounding progress ring fades in. */
   transition: opacity 0s var(--outliner-collapse-duration), color 120ms ease;
 }
 
+.outliner-host[data-dragging="true"] .outliner-trigger {
+  cursor: grabbing;
+}
+
 .outliner-trigger:hover {
-  color: var(--text-normal);
+  color: var(--text-accent, var(--outliner-accent));
 }
 
 .outliner-trigger[aria-disabled="true"] {
-  cursor: default;
   color: var(--text-faint);
 }
 
@@ -156,6 +182,8 @@
   pointer-events: none;
   opacity: 1;
   visibility: visible;
+
+  /* Wait for collapse plus a short pause before bringing the progress ring back. */
   transition: opacity 320ms ease calc(var(--outliner-collapse-duration) + 80ms), visibility 0s;
 }
 
@@ -185,6 +213,7 @@
   left: 0;
   display: flex;
   flex-direction: column;
+
   /* Keep auto-scroll measurements stable while the shell animates around the panel. */
   height: calc(var(--outliner-expanded-height) - 2px);
   width: calc(var(--outliner-width, 280px) - 2px);
