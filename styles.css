@@ -1,25 +1,25 @@
-.outliner-container {
+.slick-outline-container {
   position: relative;
 }
 
-.outliner-host {
+.slick-outline-host {
   position: absolute;
   z-index: 15;
   width: 36px;
   height: 36px;
   pointer-events: none;
-  --outliner-glass: var(--background-primary);
-  --outliner-edge: var(--background-modifier-border);
-  --outliner-accent: var(--interactive-accent);
-  --outliner-inactive: color-mix(in srgb, var(--text-muted) 80%, var(--background-primary));
-  --outliner-collapse-duration: 300ms;
+  --slick-outline-glass: var(--background-primary);
+  --slick-outline-edge: var(--background-modifier-border);
+  --slick-outline-accent: var(--interactive-accent);
+  --slick-outline-inactive: color-mix(in srgb, var(--text-muted) 80%, var(--background-primary));
+  --slick-outline-collapse-duration: 300ms;
 }
 
-.outliner-host[hidden] {
+.slick-outline-host[hidden] {
   display: none;
 }
 
-.outliner-drop-preview {
+.slick-outline-drop-preview {
   position: absolute;
   z-index: 16;
   width: 42px;
@@ -30,12 +30,12 @@
   pointer-events: none;
 }
 
-.outliner-drop-preview[hidden] {
+.slick-outline-drop-preview[hidden] {
   display: none;
 }
 
-.outliner-shell {
-  --outliner-expanded-height: min(var(--outliner-height, 420px), var(--outliner-natural-height, 420px));
+.slick-outline-shell {
+  --slick-outline-expanded-height: min(var(--slick-outline-height, 420px), var(--slick-outline-natural-height, 420px));
   position: absolute;
   top: 0;
   left: 0;
@@ -44,7 +44,7 @@
   overflow: hidden;
   border: 1px solid transparent;
   border-radius: 50%;
-  background: var(--outliner-glass);
+  background: var(--slick-outline-glass);
   color: var(--text-normal);
   box-sizing: border-box;
   box-shadow: none;
@@ -53,43 +53,43 @@
 
   /* Fade the edge only near the end of collapse, leaving no halo around the circle. */
   transition:
-    width var(--outliner-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
-    height var(--outliner-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius var(--outliner-collapse-duration) ease,
+    width var(--slick-outline-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
+    height var(--slick-outline-collapse-duration) cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius var(--slick-outline-collapse-duration) ease,
     border-color 120ms ease 180ms,
     box-shadow 120ms ease 180ms;
 }
 
 /* Anchor contents with the shell so bottom/right expansion does not slide the text. */
-.outliner-host[data-placement$="-right"] .outliner-shell,
-.outliner-host[data-placement$="-right"] .outliner-panel {
+.slick-outline-host[data-placement$="-right"] .slick-outline-shell,
+.slick-outline-host[data-placement$="-right"] .slick-outline-panel {
   left: auto;
   right: 0;
 }
 
-.outliner-host[data-placement^="bottom-"] .outliner-shell,
-.outliner-host[data-placement^="bottom-"] .outliner-panel {
+.slick-outline-host[data-placement^="bottom-"] .slick-outline-shell,
+.slick-outline-host[data-placement^="bottom-"] .slick-outline-panel {
   top: auto;
   bottom: 0;
 }
 
 @supports ((backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px))) {
-  .outliner-host {
-    --outliner-glass: color-mix(in srgb, var(--background-primary) 76%, transparent);
-    --outliner-edge: color-mix(in srgb, var(--text-normal) 13%, transparent);
+  .slick-outline-host {
+    --slick-outline-glass: color-mix(in srgb, var(--background-primary) 76%, transparent);
+    --slick-outline-edge: color-mix(in srgb, var(--text-normal) 13%, transparent);
   }
 
-  .outliner-shell {
+  .slick-outline-shell {
     -webkit-backdrop-filter: blur(18px) saturate(1.25);
     backdrop-filter: blur(18px) saturate(1.25);
   }
 }
 
-.outliner-shell[data-expanded="true"] {
-  width: var(--outliner-width, 280px);
-  height: var(--outliner-expanded-height);
+.slick-outline-shell[data-expanded="true"] {
+  width: var(--slick-outline-width, 280px);
+  height: var(--slick-outline-expanded-height);
   border-radius: 10px;
-  border-color: var(--outliner-edge);
+  border-color: var(--slick-outline-edge);
   box-shadow:
     0 12px 36px var(--background-modifier-box-shadow),
     inset 0 1px 0 color-mix(in srgb, var(--text-normal) 9%, transparent);
@@ -101,7 +101,7 @@
     box-shadow 260ms ease;
 }
 
-.outliner-host button {
+.slick-outline-host button {
   appearance: none;
   padding: 0;
   margin: 0;
@@ -114,12 +114,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.outliner-host button:focus-visible {
+.slick-outline-host button:focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: -2px;
 }
 
-.outliner-icon {
+.slick-outline-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -127,13 +127,13 @@
   height: 18px;
 }
 
-.outliner-icon svg {
+.slick-outline-icon svg {
   width: 18px;
   height: 18px;
   stroke-width: 1.7;
 }
 
-.outliner-host .outliner-trigger {
+.slick-outline-host .slick-outline-trigger {
   position: absolute;
   inset: -1px;
   display: flex;
@@ -149,28 +149,28 @@
   user-select: none;
 
   /* Restore the icon after collapse; only the surrounding progress ring fades in. */
-  transition: opacity 0s var(--outliner-collapse-duration), color 120ms ease;
+  transition: opacity 0s var(--slick-outline-collapse-duration), color 120ms ease;
 }
 
-.outliner-host[data-dragging="true"] .outliner-trigger {
+.slick-outline-host[data-dragging="true"] .slick-outline-trigger {
   cursor: grabbing;
 }
 
-.outliner-trigger:hover {
-  color: var(--text-accent, var(--outliner-accent));
+.slick-outline-trigger:hover {
+  color: var(--text-accent, var(--slick-outline-accent));
 }
 
-.outliner-trigger[aria-disabled="true"] {
+.slick-outline-trigger[aria-disabled="true"] {
   color: var(--text-faint);
 }
 
-.outliner-shell[data-expanded="true"] .outliner-trigger {
+.slick-outline-shell[data-expanded="true"] .slick-outline-trigger {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0s, color 120ms ease;
 }
 
-.outliner-progress {
+.slick-outline-progress {
   position: absolute;
   top: -3px;
   left: -3px;
@@ -184,30 +184,30 @@
   visibility: visible;
 
   /* Wait for collapse plus a short pause before bringing the progress ring back. */
-  transition: opacity 320ms ease calc(var(--outliner-collapse-duration) + 80ms), visibility 0s;
+  transition: opacity 320ms ease calc(var(--slick-outline-collapse-duration) + 80ms), visibility 0s;
 }
 
-.outliner-progress[data-disabled="true"] {
+.slick-outline-progress[data-disabled="true"] {
   opacity: 0.45;
 }
 
-.outliner-progress[data-expanded="true"] {
+.slick-outline-progress[data-expanded="true"] {
   opacity: 0;
   visibility: hidden;
   transition: opacity 80ms ease, visibility 0s 80ms;
 }
 
-.outliner-progress__track {
+.slick-outline-progress__track {
   stroke: var(--background-modifier-border);
 }
 
-.outliner-progress__fill {
-  stroke: var(--outliner-accent);
+.slick-outline-progress__fill {
+  stroke: var(--slick-outline-accent);
   stroke-linecap: round;
   transition: stroke-dashoffset 140ms linear;
 }
 
-.outliner-panel {
+.slick-outline-panel {
   position: absolute;
   top: 0;
   left: 0;
@@ -215,22 +215,22 @@
   flex-direction: column;
 
   /* Keep auto-scroll measurements stable while the shell animates around the panel. */
-  height: calc(var(--outliner-expanded-height) - 2px);
-  width: calc(var(--outliner-width, 280px) - 2px);
+  height: calc(var(--slick-outline-expanded-height) - 2px);
+  width: calc(var(--slick-outline-width, 280px) - 2px);
   padding: 12px 12px 16px;
   box-sizing: border-box;
   visibility: hidden;
   pointer-events: none;
-  transition: visibility 0s var(--outliner-collapse-duration);
+  transition: visibility 0s var(--slick-outline-collapse-duration);
 }
 
-.outliner-shell[data-expanded="true"] .outliner-panel {
+.slick-outline-shell[data-expanded="true"] .slick-outline-panel {
   visibility: visible;
   pointer-events: auto;
   transition: visibility 0s;
 }
 
-.outliner-header {
+.slick-outline-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -240,12 +240,12 @@
   margin-bottom: 8px;
 }
 
-.outliner-reading-time {
+.slick-outline-reading-time {
   font-size: var(--font-ui-smaller);
   color: var(--text-muted);
 }
 
-.outliner-host .outliner-close {
+.slick-outline-host .slick-outline-close {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -255,12 +255,12 @@
   color: var(--text-muted);
 }
 
-.outliner-host .outliner-close:hover {
+.slick-outline-host .slick-outline-close:hover {
   background: var(--background-modifier-hover);
   color: var(--text-normal);
 }
 
-.outliner-list {
+.slick-outline-list {
   min-width: 0;
   min-height: 0;
   overflow-y: auto;
@@ -271,18 +271,18 @@
   padding: 0 2px 0 8px;
 }
 
-.outliner-list ol {
+.slick-outline-list ol {
   position: relative;
   list-style: none;
   margin: 0;
   padding: 0 0 0 1px;
 }
 
-.outliner-list-content {
+.slick-outline-list-content {
   position: relative;
 }
 
-.outliner-rail-layer {
+.slick-outline-rail-layer {
   position: absolute;
   left: 0;
   top: 0;
@@ -293,22 +293,22 @@
   z-index: 1;
 }
 
-.outliner-active-rail {
+.slick-outline-active-rail {
   position: absolute;
   left: 0;
   top: 0;
   width: 2px;
   border-radius: 999px;
-  background: var(--text-accent, var(--outliner-accent));
+  background: var(--text-accent, var(--slick-outline-accent));
 }
 
-.outliner-active-rail[data-animated="true"] {
+.slick-outline-active-rail[data-animated="true"] {
   transition:
     transform 300ms cubic-bezier(0.22, 1.35, 0.36, 1),
     height 240ms cubic-bezier(0.22, 0.8, 0.36, 1);
 }
 
-.outliner-list ol::before {
+.slick-outline-list ol::before {
   content: "";
   position: absolute;
   left: 0;
@@ -320,12 +320,12 @@
   pointer-events: none;
 }
 
-.outliner-list li {
+.slick-outline-list li {
   margin: 0;
   padding: 0;
 }
 
-.outliner-host .outliner-heading {
+.slick-outline-host .slick-outline-heading {
   position: relative;
   display: block;
   width: 100%;
@@ -334,7 +334,7 @@
   box-sizing: border-box;
   height: auto;
   min-height: 30px;
-  padding: 6px 8px 6px 20px;
+  padding: 4px 8px 4px calc(12px + var(--slick-outline-heading-indent, 0px));
   border-radius: 0 5px 5px 0;
   text-align: left;
   white-space: normal;
@@ -342,21 +342,34 @@
   font-size: var(--font-ui-small);
   font-weight: 300;
   line-height: 1.5;
-  color: var(--outliner-inactive);
+  color: var(--slick-outline-inactive);
 }
 
-.outliner-host .outliner-heading > span {
+/* Indent the whole text block so wrapped lines align without moving the shared rail. */
+.slick-outline-host .slick-outline-heading[data-level="2"] {
+  --slick-outline-heading-indent: 16px;
+}
+
+.slick-outline-host .slick-outline-heading[data-level="3"] {
+  --slick-outline-heading-indent: 32px;
+}
+
+.slick-outline-host .slick-outline-heading[data-level="4"] {
+  --slick-outline-heading-indent: 48px;
+}
+
+.slick-outline-host .slick-outline-heading > span {
   display: block;
   white-space: normal;
   overflow-wrap: anywhere;
   color: inherit;
 }
 
-.outliner-shell[data-expanded="true"] .outliner-heading > span {
-  animation: outliner-heading-enter 300ms cubic-bezier(0, 0, 0.3, 1) both;
+.slick-outline-shell[data-expanded="true"] .slick-outline-heading > span {
+  animation: slick-outline-heading-enter 300ms cubic-bezier(0, 0, 0.3, 1) both;
 }
 
-@keyframes outliner-heading-enter {
+@keyframes slick-outline-heading-enter {
   from {
     opacity: 0;
     transform: translateX(-12px);
@@ -368,32 +381,32 @@
   }
 }
 
-.outliner-host .outliner-heading:hover {
+.slick-outline-host .slick-outline-heading:hover {
   color: var(--text-normal);
   background: var(--background-modifier-hover);
 }
 
-.outliner-host .outliner-heading[aria-current="location"],
-.outliner-host .outliner-heading[aria-current="location"] > span {
-  color: var(--text-accent, var(--outliner-accent));
+.slick-outline-host .slick-outline-heading[aria-current="location"],
+.slick-outline-host .slick-outline-heading[aria-current="location"] > span {
+  color: var(--text-accent, var(--slick-outline-accent));
   font-weight: var(--font-semibold, 600);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .outliner-shell,
-  .outliner-shell[data-expanded="true"],
-  .outliner-panel,
-  .outliner-shell[data-expanded="true"] .outliner-panel,
-  .outliner-progress,
-  .outliner-progress[data-expanded="true"],
-  .outliner-progress__fill,
-  .outliner-host .outliner-trigger,
-  .outliner-shell[data-expanded="true"] .outliner-trigger,
-  .outliner-active-rail[data-animated="true"] {
+  .slick-outline-shell,
+  .slick-outline-shell[data-expanded="true"],
+  .slick-outline-panel,
+  .slick-outline-shell[data-expanded="true"] .slick-outline-panel,
+  .slick-outline-progress,
+  .slick-outline-progress[data-expanded="true"],
+  .slick-outline-progress__fill,
+  .slick-outline-host .slick-outline-trigger,
+  .slick-outline-shell[data-expanded="true"] .slick-outline-trigger,
+  .slick-outline-active-rail[data-animated="true"] {
     transition: none;
   }
 
-  .outliner-shell[data-expanded="true"] .outliner-heading > span {
+  .slick-outline-shell[data-expanded="true"] .slick-outline-heading > span {
     animation: none;
   }
 }

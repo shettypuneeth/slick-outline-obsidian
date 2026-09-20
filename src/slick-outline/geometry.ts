@@ -1,4 +1,4 @@
-import type { OutlinerPlacement } from '../settings';
+import type { SlickOutlinePlacement } from '../settings';
 
 export const CONTROL_SIZE = 36;
 export const PANEL_WIDTH = 280;
@@ -99,7 +99,7 @@ export function resolvePosition(position: RelativePosition, bounds: PositionBoun
  */
 export function customGeometry(
   position: OutlinePosition, bounds: PositionBounds, contentLeft: number, contentRight: number,
-  fixedPlacement?: OutlinerPlacement,
+  fixedPlacement?: SlickOutlinePlacement,
 ) {
   const point = constrainPosition(position, bounds);
   const roomLeft = point.left + CONTROL_SIZE - bounds.minLeft;
@@ -110,7 +110,7 @@ export function customGeometry(
   // Keep the named corner anchored during animations; otherwise expand toward more room.
   const opensLeft = fixedPlacement ? fixedPlacement.endsWith('right') : roomLeft > roomRight;
   const opensUp = fixedPlacement ? fixedPlacement.startsWith('bottom') : roomAbove > roomBelow;
-  const placement: OutlinerPlacement = opensUp
+  const placement: SlickOutlinePlacement = opensUp
     ? opensLeft ? 'bottom-right' : 'bottom-left'
     : opensLeft ? 'top-right' : 'top-left';
   const gutterWidth = opensLeft
@@ -160,7 +160,7 @@ export function activeHeadingIndex(
 /** Fits a corner preset into the note gutter when possible, falling back to an overlay panel. */
 export function overlayGeometry(
   width: number, height: number, contentLeft: number, contentRight: number,
-  top: number, placement: OutlinerPlacement, bottomObstruction = 0,
+  top: number, placement: SlickOutlinePlacement, bottomObstruction = 0,
 ) {
   const isRightAligned = placement.endsWith('right');
   const isBottomAligned = placement.startsWith('bottom');

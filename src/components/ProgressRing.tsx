@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import type { ProgressStore } from '../outliner/ProgressStore';
+import type { ProgressStore } from '../slick-outline/ProgressStore';
 
 interface ProgressRingProps {
   progress: ProgressStore;
@@ -12,15 +12,15 @@ export function ProgressRing({ progress: store, expanded, disabled }: ProgressRi
 
   return (
     <svg
-      className="outliner-progress"
+      className="slick-outline-progress"
       viewBox="0 0 42 42"
       data-expanded={expanded}
       data-disabled={disabled}
       aria-hidden="true"
     >
-      <circle className="outliner-progress__track" cx="21" cy="21" r="19.25" />
+      <circle className="slick-outline-progress__track" cx="21" cy="21" r="19.25" />
       <circle
-        className="outliner-progress__fill"
+        className="slick-outline-progress__fill"
         cx="21" cy="21" r="19.25"
         pathLength="100"
         strokeDasharray="100"

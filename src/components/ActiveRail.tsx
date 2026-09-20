@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import type { OutlineHeading } from '../outliner/model';
+import type { OutlineHeading } from '../slick-outline/model';
 
 interface ActiveRailProps {
   expanded: boolean;
@@ -14,7 +14,7 @@ export function ActiveRail({ expanded, active, headings }: ActiveRailProps) {
   useLayoutEffect(() => {
     const rail = railRef.current;
     if (!rail) return;
-    const content = rail.closest<HTMLElement>('.outliner-list-content');
+    const content = rail.closest<HTMLElement>('.slick-outline-list-content');
     const activeItem = content?.querySelector<HTMLElement>('[aria-current="location"]');
     const win = rail.ownerDocument.defaultView;
     if (!content || !activeItem || !win) {
@@ -50,8 +50,8 @@ export function ActiveRail({ expanded, active, headings }: ActiveRailProps) {
   }, [expanded, active, headings]);
 
   return (
-    <div className="outliner-rail-layer" aria-hidden="true">
-      <div ref={railRef} className="outliner-active-rail" />
+    <div className="slick-outline-rail-layer" aria-hidden="true">
+      <div ref={railRef} className="slick-outline-active-rail" />
     </div>
   );
 }

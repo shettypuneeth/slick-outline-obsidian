@@ -1,30 +1,30 @@
-# Outliner
+# SlickOutline
 
 A floating document outline for Obsidian, with a frosted-glass surface that
 adapts to your theme and a circular reading-progress indicator.
 
 ## Use
 
-1. Enable **Outliner** in Obsidian's Community plugins settings. If it is not
+1. Enable **SlickOutline** in Obsidian's Community plugins settings. If it is not
    listed yet, reload Obsidian so it discovers the new plugin.
 2. Open a Markdown note in Live Preview or Reading View.
-3. Run **Outliner: Show outliner** from the command palette.
+3. Run **SlickOutline: Show outline** from the command palette.
 4. Click the circular list icon to open the outline. Click a heading to
    navigate, or the top-right close button to collapse it.
 
 Run the command again to remove the control from that pane. You can assign a
 hotkey to the command in Obsidian settings.
 
-Each pane has its own outliner. Switching notes keeps it enabled but collapses
+Each pane has its own outline. Switching notes keeps it enabled but collapses
 it. Closing the pane or restarting Obsidian resets visibility. Source Mode is
 not supported; the control hides until you return to a supported mode.
 
 ## Behavior
 
-- In **Settings -> Outliner -> Reading speed**, set a positive whole number of
+- In **Settings -> SlickOutline -> Reading speed**, set a positive whole number of
   words per minute (default **200**). Press Enter or leave the field to save.
   Reading-time estimates update in enabled panes without reopening the outline.
-- In **Settings -> Outliner -> Placement**, choose **Top left** (default),
+- In **Settings -> SlickOutline -> Placement**, choose **Top left** (default),
   **Top right**, **Bottom left**, or **Bottom right**. The choice is saved and
   applies immediately to all enabled panes.
 - Drag the collapsed circle to choose a custom position inside its pane.
@@ -37,7 +37,7 @@ not supported; the control hides until you return to a supported mode.
 - Press Escape during a drag to cancel. Expanded panels cannot be dragged;
   dragging still works when a note has no headings. Keyboard movement is not
   included in version 1.
-- The outliner sits 36px inside the selected side of the pane. Top placements
+- The outline sits 36px inside the selected side of the pane. Top placements
   align with Properties (or the note title when Properties is hidden); bottom
   placements sit at least 48px above the pane's bottom edge and leave 24px above
   an overlapping status bar. It stays fixed while scrolling.
@@ -48,7 +48,10 @@ not supported; the control hides until you return to a supported mode.
   moving the circle or extending past the pane and status-bar clearance.
 - Panel contents stay anchored to the selected corner while the shell expands
   or collapses, avoiding extra movement at bottom and right placements.
-- H1 and H2 headings form a flat, scrollable list.
+- H1-H4 headings appear in document order, with 12px of base left padding and
+  16px of additional indentation per level after H1.
+  Wrapped lines align with their heading text, and all levels share one active rail.
+  Indentation follows the actual heading level even when intermediate levels are skipped.
 - The current section and active rail marker share the brighter text accent.
   The remaining rail uses a visible neutral tone; inactive headings stay faint
   with a light (300) font weight.
@@ -88,18 +91,18 @@ npm run build
 `npm run build` type-checks the source and writes `main.js` alongside
 `manifest.json` and `styles.css`. Use `npm run dev` for a development watcher;
 the included `.hotreload` marker opts this folder into the Hot Reload plugin
-when installed. Without Hot Reload, reload Outliner in Community plugins
+when installed. Without Hot Reload, reload SlickOutline in Community plugins
 after changes so both the JavaScript and stylesheet are refreshed.
 
 The project follows Chronicle's React, TypeScript, and esbuild structure.
-`src/views/OutlinerView.tsx` owns the pane lifecycle and React mounting.
+`src/views/SlickOutlineView.tsx` owns the pane lifecycle and React mounting.
 `src/components/` contains the shell, collapsed control, expanded panel,
-heading list, and shared Obsidian icon component. `src/outliner/` contains
+heading list, and shared Obsidian icon component. `src/slick-outline/` contains
 heading extraction, editor integration, geometry, progress state, and
 navigation. The `@views/*` and `@components/*` aliases match Chronicle.
 `src/utils/draggable.ts` owns reusable pointer gestures, capture, cancellation,
 and click suppression. It reports movement only; pane positioning remains
-owned by `OutlinerView` and the pure geometry helpers.
+owned by `SlickOutlineView` and the pure geometry helpers.
 
 CodeMirror integration uses an editor extension and source-position anchors
 instead of depending on rendered Live Preview headings, which are virtualized.

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, type RefObject } from 'react';
-import type { OutlineHeading } from '../outliner/model';
+import type { OutlineHeading } from '../slick-outline/model';
 import { ActiveRail } from './ActiveRail';
 
 interface OutlineListProps {
@@ -52,14 +52,15 @@ export function OutlineList({ expanded, headings, active, shellRef, onNavigate }
   }, [active, expanded, headings, shellRef]);
 
   return (
-    <div ref={listRef} className="outliner-list">
-      <div className="outliner-list-content">
+    <div ref={listRef} className="slick-outline-list">
+      <div className="slick-outline-list-content">
         <ol>
           {headings.map((heading, index) => (
             <li key={heading.id}>
               <button
                 type="button"
-                className="outliner-heading"
+                className="slick-outline-heading"
+                data-level={heading.level}
                 aria-current={index === active ? 'location' : undefined}
                 title={heading.label}
                 tabIndex={expanded ? 0 : -1}

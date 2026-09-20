@@ -3,7 +3,7 @@ import { GFM, parser } from '@lezer/markdown';
 export interface OutlineHeading {
   id: string;
   label: string;
-  level: 1 | 2;
+  level: 1 | 2 | 3 | 4;
   line: number;
   from: number;
   to: number;
@@ -30,7 +30,7 @@ export function headingLabel(text: string): string {
 }
 
 /**
- * Extracts H1/H2 headings and counts words without treating frontmatter or code as prose.
+ * Extracts H1-H4 headings and counts words without treating frontmatter or code as prose.
  * Heading ranges retain original character offsets and zero-based source lines for navigation.
  */
 export function buildOutline(source: string): OutlineSnapshot {
@@ -66,15 +66,17 @@ export function buildOutline(source: string): OutlineSnapshot {
         excludedCodeRanges.push({ from: node.from, to: node.to });
         return false;
       }
-      if (!/^(ATX|Setext)Heading[12]$/.test(node.name)) return;
+      if (!/^(ATX|Setext)Heading[1-4]$/.test(node.name)) return;
       const rawHeading = maskedSource.slice(node.from, node.to);
       const title = node.name.startsWith('ATX')
-        ? rawHeading.replace(/^ {0,3}#{1,2}(?:[ \t]+|$)/, '').replace(/[ \t]+#+[ \t]*$/, '')
+        ? rawHeading.replace(/^ {0,3}#{1,4}(?:[ \t]+|$)/, '').replace(/[ \t]+#+[ \t]*$/, '')
         : rawHeading.replace(/\r?\n[ \t]*[=-]+[ \t]*$/, '');
       headings.push({
         id: `heading-${node.from}`,
         label: headingLabel(title) || 'Untitled heading',
-        level: node.name.endsWith('1') ? 1 : 2,
+        level: node.name.endsWith('1') ? 1
+          : node.name.endsWith('2') ? 2
+          : node.name.endsWith('3') ? 3 : 4,
         line: lineAt(node.from),
         from: node.from,
         to: node.to,

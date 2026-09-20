@@ -8,5 +8,5 @@ export function ObsidianIcon({ name }: { name: string }) {
     if (ref.current) setIcon(ref.current, name);
   }, [name]);
 
-  return <span ref={ref} className="outliner-icon" aria-hidden="true" />;
+  return <span ref={ref} className="slick-outline-icon" aria-hidden="true" />;
 }

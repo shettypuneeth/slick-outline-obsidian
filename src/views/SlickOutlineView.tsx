@@ -1,19 +1,19 @@
 import { createRoot, type Root } from 'react-dom/client';
 import type { ViewUpdate } from '@codemirror/view';
 import { editorLivePreviewField, Notice, type MarkdownView } from 'obsidian';
-import { OutlinerApp } from '@components/OutlinerApp';
+import { SlickOutlineApp } from '@components/SlickOutlineApp';
 import {
   CONTROL_SIZE, activeHeadingIndex, clamp, constrainPosition, customGeometry,
   overlayGeometry, positionBounds, readingProgress, relativePosition, resolvePosition, snapPosition,
   type OutlinePosition, type RelativePosition,
-} from '../outliner/geometry';
-import { buildOutline, type OutlineHeading, type OutlineSnapshot } from '../outliner/model';
-import type { EditorBridge } from '../outliner/editorBridge';
-import type { ReadingHeadings } from '../outliner/readingHeadings';
-import { ProgressStore } from '../outliner/ProgressStore';
-import { DEFAULT_READING_SPEED_WPM, readingMinutes } from '../outliner/readingTime';
-import { HeadingNavigator } from '../outliner/HeadingNavigator';
-import type { OutlinerPlacement, OutlinerSettings } from '../settings';
+} from '../slick-outline/geometry';
+import { buildOutline, type OutlineHeading, type OutlineSnapshot } from '../slick-outline/model';
+import type { EditorBridge } from '../slick-outline/editorBridge';
+import type { ReadingHeadings } from '../slick-outline/readingHeadings';
+import { ProgressStore } from '../slick-outline/ProgressStore';
+import { DEFAULT_READING_SPEED_WPM, readingMinutes } from '../slick-outline/readingTime';
+import { HeadingNavigator } from '../slick-outline/HeadingNavigator';
+import type { SlickOutlinePlacement, SlickOutlineSettings } from '../settings';
 import { attachDraggable, type DragController, type DragPoint } from '../utils/draggable';
 
 type OwnerWindow = Window & typeof globalThis;
@@ -41,7 +41,7 @@ interface DragState {
  * Owns one Markdown pane's overlay, translating editor state and pointer gestures
  * into layout updates while React renders the outline's contents.
  */
-export class OutlinerView {
+export class SlickOutlineView {
   private readonly host: HTMLDivElement;
   private readonly dropPreview: HTMLDivElement;
   private readonly root: Root;
@@ -77,26 +77,26 @@ export class OutlinerView {
   private pendingPosition: RelativePosition | null = null;
   private savingPosition = false;
 
-  private placement: OutlinerPlacement = 'top-left';
+  private placement: SlickOutlinePlacement = 'top-left';
   private directionLockedUntil = 0;
 
   constructor(
     readonly view: MarkdownView,
     private readonly bridge: EditorBridge,
     private readonly readingHeadings: ReadingHeadings,
-    private readonly getSettings: () => Readonly<OutlinerSettings>,
+    private readonly getSettings: () => Readonly<SlickOutlineSettings>,
     private readonly savePosition: (position: RelativePosition) => Promise<void>,
   ) {
     const ownerWindow = view.contentEl.ownerDocument.defaultView;
-    if (!ownerWindow) throw new Error('Outliner requires an attached editor window.');
+    if (!ownerWindow) throw new Error('SlickOutline requires an attached editor window.');
     this.win = ownerWindow;
     this.navigator = new HeadingNavigator(view, this.win, this.schedule);
 
-    this.host = view.contentEl.createDiv({ cls: 'outliner-host' });
-    this.dropPreview = view.contentEl.createDiv({ cls: 'outliner-drop-preview' });
+    this.host = view.contentEl.createDiv({ cls: 'slick-outline-host' });
+    this.dropPreview = view.contentEl.createDiv({ cls: 'slick-outline-drop-preview' });
     this.dropPreview.hidden = true;
     this.dropPreview.setAttribute('aria-hidden', 'true');
-    view.contentEl.addClass('outliner-container');
+    view.contentEl.addClass('slick-outline-container');
     this.root = createRoot(this.host);
 
     this.resizeObserver = new this.win.ResizeObserver(this.schedule);
@@ -372,8 +372,8 @@ export class OutlinerView {
     this.host.dataset.placement = geometry.placement;
     this.host.style.left = `${geometry.left}px`;
     this.host.style.top = `${geometry.top}px`;
-    this.host.style.setProperty('--outliner-width', `${geometry.width}px`);
-    this.host.style.setProperty('--outliner-height', `${geometry.height}px`);
+    this.host.style.setProperty('--slick-outline-width', `${geometry.width}px`);
+    this.host.style.setProperty('--slick-outline-height', `${geometry.height}px`);
     if (this.drag && point) {
 
       // Preview the snap separately so the circle continues to follow the pointer.
@@ -433,7 +433,7 @@ export class OutlinerView {
     const controller = attachDraggable(element, {
       threshold: 6,
       canStart: () => {
-        const shell = this.host.querySelector('.outliner-shell')?.getBoundingClientRect();
+        const shell = this.host.querySelector('.slick-outline-shell')?.getBoundingClientRect();
 
         // Wait for collapse to finish before measuring the circle's pointer grab offset.
         return !this.disposed && !this.expanded && !this.savingPosition && !this.host.hidden &&
@@ -512,8 +512,8 @@ export class OutlinerView {
       this.schedulePosition();
     };
     void this.savePosition(position).then(finishSave, (error: unknown) => {
-      console.error('Outliner could not save its dragged position.', error);
-      new Notice('Could not save the outliner position. The previous position has been restored.');
+      console.error('SlickOutline could not save its dragged position.', error);
+      new Notice('Could not save the outline position. The previous position has been restored.');
       finishSave();
     });
   }
@@ -521,7 +521,7 @@ export class OutlinerView {
   private render(): void {
     this.dirtyRender = false;
     this.root.render(
-      <OutlinerApp
+      <SlickOutlineApp
         expanded={this.expanded}
         headings={this.snapshot.headings}
         minutes={readingMinutes(this.snapshot.wordCount, this.readingSpeedWpm)}
@@ -577,6 +577,6 @@ export class OutlinerView {
     this.root.unmount();
     this.host.remove();
     this.dropPreview.remove();
-    this.view.contentEl.removeClass('outliner-container');
+    this.view.contentEl.removeClass('slick-outline-container');
   }
 }

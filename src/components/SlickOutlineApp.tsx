@@ -1,11 +1,11 @@
 import { useLayoutEffect, useRef } from 'react';
-import type { OutlineHeading } from '../outliner/model';
-import type { ProgressStore } from '../outliner/ProgressStore';
-import { CollapsedOutliner } from './CollapsedOutliner';
-import { ExpandedOutliner } from './ExpandedOutliner';
+import type { OutlineHeading } from '../slick-outline/model';
+import type { ProgressStore } from '../slick-outline/ProgressStore';
+import { CollapsedOutline } from './CollapsedOutline';
+import { ExpandedOutline } from './ExpandedOutline';
 import { ProgressRing } from './ProgressRing';
 
-export interface OutlinerProps {
+export interface SlickOutlineProps {
   expanded: boolean;
   headings: readonly OutlineHeading[];
   minutes: number;
@@ -17,7 +17,7 @@ export interface OutlinerProps {
   onNavigate: (heading: OutlineHeading) => void;
 }
 
-export function OutlinerApp(props: OutlinerProps) {
+export function SlickOutlineApp(props: SlickOutlineProps) {
   const { expanded, headings, minutes, active, progress } = props;
 
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -42,15 +42,15 @@ export function OutlinerApp(props: OutlinerProps) {
 
   return (
     <>
-      <div ref={shellRef} className="outliner-shell" data-expanded={expanded}>
-        <CollapsedOutliner
+      <div ref={shellRef} className="slick-outline-shell" data-expanded={expanded}>
+        <CollapsedOutline
           ref={triggerRef}
           expanded={expanded}
           empty={headings.length === 0}
           progress={progress}
           onExpand={props.onExpand}
         />
-        <ExpandedOutliner
+        <ExpandedOutline
           expanded={expanded}
           headings={headings}
           minutes={minutes}

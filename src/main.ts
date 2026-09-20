@@ -1,22 +1,22 @@
 import { MarkdownView, Plugin, type WorkspaceLeaf } from 'obsidian';
-import { EditorBridge } from './outliner/editorBridge';
-import { OutlinerView } from '@views/OutlinerView';
-import { ReadingHeadings } from './outliner/readingHeadings';
+import { EditorBridge } from './slick-outline/editorBridge';
+import { SlickOutlineView } from '@views/SlickOutlineView';
+import { ReadingHeadings } from './slick-outline/readingHeadings';
 import {
-  DEFAULT_SETTINGS, OutlinerSettingTab, readSettings, type OutlinerPlacement, type OutlinerSettings,
+  DEFAULT_SETTINGS, SlickOutlineSettingTab, readSettings, type SlickOutlinePlacement, type SlickOutlineSettings,
 } from './settings';
-import type { RelativePosition } from './outliner/geometry';
-import { isReadingSpeedWpm } from './outliner/readingTime';
+import type { RelativePosition } from './slick-outline/geometry';
+import { isReadingSpeedWpm } from './slick-outline/readingTime';
 
 /**
- * Connects Obsidian's editor and workspace lifecycle to pane-owned outliner views.
+ * Connects Obsidian's editor and workspace lifecycle to pane-owned outline views.
  * Enabled panes are session-local; placement settings are persisted and shared.
  */
-export default class OutlinerPlugin extends Plugin {
+export default class SlickOutlinePlugin extends Plugin {
   settings = { ...DEFAULT_SETTINGS };
 
   // Only panes explicitly enabled through the command own an overlay.
-  private readonly panes = new Map<WorkspaceLeaf, OutlinerView>();
+  private readonly panes = new Map<WorkspaceLeaf, SlickOutlineView>();
 
   // Shared adapters provide source positions for Live Preview and Reading View.
   private bridge!: EditorBridge;
@@ -46,10 +46,10 @@ export default class OutlinerPlugin extends Plugin {
       this.readingHeadings.process(element, context);
     });
 
-    this.addSettingTab(new OutlinerSettingTab(this));
+    this.addSettingTab(new SlickOutlineSettingTab(this));
     this.addCommand({
-      id: 'show-outliner',
-      name: 'Show outliner',
+      id: 'show-slick-outline',
+      name: 'Show outline',
       checkCallback: (checking) => {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);
         if (!view?.file) return false;
@@ -67,7 +67,7 @@ export default class OutlinerPlugin extends Plugin {
             existingPane.destroy();
             this.panes.delete(view.leaf);
           } else {
-            this.panes.set(view.leaf, new OutlinerView(
+            this.panes.set(view.leaf, new SlickOutlineView(
               view, this.bridge, this.readingHeadings, () => this.settings,
               (position) => this.savePosition(position),
             ));
@@ -94,7 +94,7 @@ export default class OutlinerPlugin extends Plugin {
   }
 
   /** Replaces a custom position with a corner preset, cancelling any unfinished gestures. */
-  setPlacement(placement: OutlinerPlacement): Promise<void> {
+  setPlacement(placement: SlickOutlinePlacement): Promise<void> {
     for (const pane of this.panes.values()) pane.cancelDrag();
     return this.writeSettings({ placement, customPosition: null });
   }
@@ -114,7 +114,7 @@ export default class OutlinerPlugin extends Plugin {
   }
 
   /** Serializes disk writes and publishes successful settings to panes in the same order. */
-  private writeSettings(changes: Partial<OutlinerSettings>): Promise<void> {
+  private writeSettings(changes: Partial<SlickOutlineSettings>): Promise<void> {
     const write = async () => {
 
       // Merge when this write runs so concurrent placement and speed changes cannot overwrite each other.

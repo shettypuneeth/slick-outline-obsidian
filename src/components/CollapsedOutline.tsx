@@ -1,16 +1,16 @@
 import { forwardRef, useSyncExternalStore } from 'react';
-import type { ProgressStore } from '../outliner/ProgressStore';
+import type { ProgressStore } from '../slick-outline/ProgressStore';
 import { ObsidianIcon } from './ObsidianIcon';
 
-interface CollapsedOutlinerProps {
+interface CollapsedOutlineProps {
   expanded: boolean;
   empty: boolean;
   progress: ProgressStore;
   onExpand: () => void;
 }
 
-export const CollapsedOutliner = forwardRef<HTMLButtonElement, CollapsedOutlinerProps>(
-  function CollapsedOutliner({ expanded, empty, progress: store, onExpand }, ref) {
+export const CollapsedOutline = forwardRef<HTMLButtonElement, CollapsedOutlineProps>(
+  function CollapsedOutline({ expanded, empty, progress: store, onExpand }, ref) {
     const progress = useSyncExternalStore(store.subscribe, store.getSnapshot);
     const percentage = Math.round(progress * 100);
 
@@ -18,9 +18,9 @@ export const CollapsedOutliner = forwardRef<HTMLButtonElement, CollapsedOutliner
     return (
       <button
         ref={ref}
-        className="outliner-trigger"
+        className="slick-outline-trigger"
         type="button"
-        aria-label={empty ? 'No H1 or H2 headings' : 'Open document outline'}
+        aria-label={empty ? 'No H1-H4 headings' : 'Open document outline'}
         aria-description={`${percentage}% through document. Drag to reposition.`}
         aria-disabled={empty}
         aria-expanded={expanded}

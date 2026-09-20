@@ -1,29 +1,29 @@
 import { Notice, PluginSettingTab, Setting } from 'obsidian';
-import type OutlinerPlugin from './main';
-import type { RelativePosition } from './outliner/geometry';
-import { DEFAULT_READING_SPEED_WPM, isReadingSpeedWpm } from './outliner/readingTime';
+import type SlickOutlinePlugin from './main';
+import type { RelativePosition } from './slick-outline/geometry';
+import { DEFAULT_READING_SPEED_WPM, isReadingSpeedWpm } from './slick-outline/readingTime';
 
-export type OutlinerPlacement = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type SlickOutlinePlacement = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
 
-export interface OutlinerSettings {
-  placement: OutlinerPlacement;
+export interface SlickOutlineSettings {
+  placement: SlickOutlinePlacement;
   customPosition: RelativePosition | null;
   readingSpeedWpm: number;
 }
 
-export const DEFAULT_SETTINGS: Readonly<OutlinerSettings> = {
+export const DEFAULT_SETTINGS: Readonly<SlickOutlineSettings> = {
   placement: 'top-left',
   customPosition: null,
   readingSpeedWpm: DEFAULT_READING_SPEED_WPM,
 };
 
-export function isPlacement(value: unknown): value is OutlinerPlacement {
+export function isPlacement(value: unknown): value is SlickOutlinePlacement {
   return value === 'top-left' || value === 'top-right' ||
     value === 'bottom-left' || value === 'bottom-right';
 }
 
 /** Loads current or legacy preferences, falling back to defaults for invalid saved values. */
-export function readSettings(data: unknown): OutlinerSettings {
+export function readSettings(data: unknown): SlickOutlineSettings {
   const savedSettings = typeof data === 'object' && data !== null ? data : {};
   const savedPosition = 'customPosition' in savedSettings ? savedSettings.customPosition : null;
 
@@ -42,9 +42,9 @@ export function readSettings(data: unknown): OutlinerSettings {
   };
 }
 
-export class OutlinerSettingTab extends PluginSettingTab {
-  constructor(private readonly outliner: OutlinerPlugin) {
-    super(outliner.app, outliner);
+export class SlickOutlineSettingTab extends PluginSettingTab {
+  constructor(private readonly plugin: SlickOutlinePlugin) {
+    super(plugin.app, plugin);
   }
 
   display(): void {
@@ -59,7 +59,7 @@ export class OutlinerSettingTab extends PluginSettingTab {
         input.max = String(Number.MAX_SAFE_INTEGER);
         input.step = '1';
         input.setAttribute('aria-label', 'Reading speed (words per minute)');
-        text.setValue(String(this.outliner.settings.readingSpeedWpm));
+        text.setValue(String(this.plugin.settings.readingSpeedWpm));
 
         // Commit a complete value, rather than saving each intermediate keystroke.
         input.addEventListener('input', () => input.setCustomValidity(''));
@@ -77,14 +77,14 @@ export class OutlinerSettingTab extends PluginSettingTab {
             return;
           }
           input.setCustomValidity('');
-          if (readingSpeedWpm === this.outliner.settings.readingSpeedWpm) return;
+          if (readingSpeedWpm === this.plugin.settings.readingSpeedWpm) return;
 
           text.setDisabled(true);
-          void this.outliner.setReadingSpeedWpm(readingSpeedWpm).then(
-            () => text.setValue(String(this.outliner.settings.readingSpeedWpm)).setDisabled(false),
+          void this.plugin.setReadingSpeedWpm(readingSpeedWpm).then(
+            () => text.setValue(String(this.plugin.settings.readingSpeedWpm)).setDisabled(false),
             (error: unknown) => {
-              text.setValue(String(this.outliner.settings.readingSpeedWpm)).setDisabled(false);
-              console.error('Outliner could not save its reading speed.', error);
+              text.setValue(String(this.plugin.settings.readingSpeedWpm)).setDisabled(false);
+              console.error('SlickOutline could not save its reading speed.', error);
               new Notice('Could not save the reading speed. Please try again.');
             },
           );
@@ -100,23 +100,23 @@ export class OutlinerSettingTab extends PluginSettingTab {
           .addOption('top-right', 'Top right')
           .addOption('bottom-left', 'Bottom left')
           .addOption('bottom-right', 'Bottom right');
-        if (this.outliner.settings.customPosition) {
+        if (this.plugin.settings.customPosition) {
 
           // Custom is a status indicator; choosing a preset clears the dragged position.
           dropdown.addOption('custom', 'Custom position');
           const option = dropdown.selectEl.querySelector<HTMLOptionElement>('option[value="custom"]');
           if (option) option.disabled = true;
         }
-        const previousSelection = this.outliner.settings.customPosition ? 'custom' : this.outliner.settings.placement;
+        const previousSelection = this.plugin.settings.customPosition ? 'custom' : this.plugin.settings.placement;
         dropdown.setValue(previousSelection).onChange(async (value) => {
-          if (!isPlacement(value)) throw new Error(`Invalid outliner placement: ${value}`);
+          if (!isPlacement(value)) throw new Error(`Invalid outline placement: ${value}`);
           dropdown.setDisabled(true);
-          await this.outliner.setPlacement(value).then(
+          await this.plugin.setPlacement(value).then(
             () => this.display(),
             (error: unknown) => {
               dropdown.setValue(previousSelection).setDisabled(false);
-              console.error('Outliner could not save its placement.', error);
-              new Notice('Could not save the outliner placement. Please try again.');
+              console.error('SlickOutline could not save its placement.', error);
+              new Notice('Could not save the outline placement. Please try again.');
             },
           );
         });
@@ -129,12 +129,12 @@ export class OutlinerSettingTab extends PluginSettingTab {
         .setCta()
         .onClick(async () => {
           button.setDisabled(true);
-          await this.outliner.resetSettings().then(
+          await this.plugin.resetSettings().then(
             () => this.display(),
             (error: unknown) => {
               button.setDisabled(false);
-              console.error('Outliner could not reset its settings.', error);
-              new Notice('Could not reset the outliner settings. Please try again.');
+              console.error('SlickOutline could not reset its settings.', error);
+              new Notice('Could not reset the outline settings. Please try again.');
             },
           );
         }));

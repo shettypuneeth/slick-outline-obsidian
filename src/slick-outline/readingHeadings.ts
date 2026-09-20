@@ -18,7 +18,7 @@ export class ReadingHeadings {
 
     const cachedHeadings = (this.app.metadataCache.getFileCache(file)?.headings ?? [])
       .filter((heading) =>
-        heading.level <= 2 &&
+        heading.level <= 4 &&
         heading.position.start.line >= section.lineStart &&
         heading.position.start.line <= section.lineEnd);
     const headingElements = this.elements(element);
@@ -49,7 +49,7 @@ export class ReadingHeadings {
   private elements(container: HTMLElement): HTMLElement[] {
 
     // Embedded notes have their own source positions and must not enter this outline.
-    return Array.from(container.querySelectorAll<HTMLElement>('h1, h2'))
+    return Array.from(container.querySelectorAll<HTMLElement>('h1, h2, h3, h4'))
       .filter((element) => !element.closest('.markdown-embed, .internal-embed'));
   }
 }

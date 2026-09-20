@@ -1,28 +1,28 @@
-# Outliner for Obsidian
+# SlickOutline for Obsidian
 
 ## Overview
 
-Outliner is a floating document-outline plugin for Obsidian. It provides a
+SlickOutline is a floating document-outline plugin for Obsidian. It provides a
 compact reading-progress control that morphs into a navigable list of the
 current note's sections.
 
 The interaction should feel like one physical object changing shape rather
 than a button disappearing and a separate panel appearing. The expanded
 outline tracks the reader's current section and provides direct navigation to
-H1 and H2 headings.
+H1-H4 headings.
 
 ## Product behavior
 
 ### Activation and lifecycle
 
-- Register a command named **Show outliner**.
+- Register a command named **Show outline**.
 - Nothing is displayed by default.
-- Running the command toggles the entire outliner for the active Markdown pane.
-- Outliner state is maintained independently for each pane until that pane
+- Running the command toggles the entire outline for the active Markdown pane.
+- SlickOutline state is maintained independently for each pane until that pane
   closes or Obsidian restarts.
 - When an enabled pane opens another note:
   - Rebuild the outline for the new note.
-  - Return the outliner to its collapsed state.
+  - Return the outline to its collapsed state.
 - Support Live Preview and Reading View.
 - Version 1 is desktop-only, but the architecture should preserve a path to
   later mobile support.
@@ -51,16 +51,16 @@ H1 and H2 headings.
 
 - Clamp progress between `0` and `1`.
 - For a document without scrollable overflow, show a complete progress ring.
-- Clicking the control expands the outliner.
+- Clicking the control expands the outline.
 - Dragging the collapsed circle moves it within the current pane after a
   6 px threshold. Dropping keeps it collapsed and saves a relative position.
 - Within 12 px of a safe edge, preview a snap target and snap on release.
 - Escape, pointer cancellation, focus loss, pane closure, and plugin unload
   cancel a drag. No keyboard movement mode is included in version 1.
-- If the note has no H1 or H2 headings:
+- If the note has no H1-H4 headings:
   - Keep the control visible.
   - Display it in a disabled, muted state.
-  - Show the tooltip **No H1 or H2 headings**.
+  - Show the tooltip **No H1-H4 headings**.
   - Clicking it does nothing.
   - Dragging it still changes the position.
 
@@ -81,8 +81,8 @@ H1 and H2 headings.
 - Only the close button collapses the expanded panel:
   - Clicking outside does nothing.
   - Pressing Escape does nothing.
-- Running **Show outliner** while the control is visible removes the entire
-  outliner rather than collapsing it.
+- Running **Show outline** while the control is visible removes the entire
+  outline rather than collapsing it.
 
 ## Animation
 
@@ -128,10 +128,13 @@ Calculation rules:
 
 ### Heading extraction
 
-- Include only H1 and H2 headings.
+- Include H1 through H4 headings; exclude H5 and H6.
 - Preserve document order.
-- Present both levels as a flat list with uniform styling.
-- Do not indent H2 headings.
+- Use one scrollable list with uniform typography and a shared active rail.
+- Use 12 px of base left padding to keep heading text close to the shared rail.
+- Add 16 px of left indentation per level after H1: H2 +16 px, H3 +32 px, H4 +48 px.
+- Follow actual heading levels, including skipped levels, without nested collapse controls.
+- Align wrapped lines with the start of their heading text.
 - Wrap heading labels to as many lines as needed, including long unbroken
   words. Do not truncate or clamp labels.
 - Show the full heading text in a tooltip.
@@ -264,8 +267,8 @@ src/
   utils/
     draggable.ts
   views/
-    OutlinerView.tsx
-  outliner/
+    SlickOutlineView.tsx
+  slick-outline/
     editorBridge.ts
     readingHeadings.ts
     HeadingNavigator.ts
@@ -273,10 +276,10 @@ src/
     geometry.ts
     model.ts
   components/
-    OutlinerApp.tsx
-    CollapsedOutliner.tsx
+    SlickOutlineApp.tsx
+    CollapsedOutline.tsx
     ProgressRing.tsx
-    ExpandedOutliner.tsx
+    ExpandedOutline.tsx
     OutlineList.tsx
     ActiveRail.tsx
     ObsidianIcon.tsx
@@ -288,10 +291,10 @@ styles.css
 Maintain a registry similar to:
 
 ```ts
-Map<WorkspaceLeaf, OutlinerView>
+Map<WorkspaceLeaf, SlickOutlineView>
 ```
 
-Each `OutlinerView` owns:
+Each `SlickOutlineView` owns:
 
 - Its overlay container and React root.
 - Enabled and expanded state.
@@ -302,9 +305,9 @@ Each `OutlinerView` owns:
 - Cleanup for listeners, observers, and animation frames.
 
 The view mounts into an existing Markdown pane rather than creating a separate
-Obsidian sidebar. `OutlinerApp` composes the shell and coordinates focus;
-`CollapsedOutliner` owns the trigger and its accessible progress description;
-`ProgressRing` owns visual progress updates; `ExpandedOutliner` owns panel sizing;
+Obsidian sidebar. `SlickOutlineApp` composes the shell and coordinates focus;
+`CollapsedOutline` owns the trigger and its accessible progress description;
+`ProgressRing` owns visual progress updates; `ExpandedOutline` owns panel sizing;
 and `OutlineList` owns heading rendering and active-item visibility.
 `HeadingNavigator` owns navigation animations and cancellation.
 
@@ -314,18 +317,18 @@ heading has not materially changed.
 
 ## Version 1 acceptance criteria
 
-1. No outliner appears until **Show outliner** runs.
+1. No outline appears until **Show outline** runs.
 2. The command affects only the active Markdown pane.
 3. Live Preview and Reading View are supported.
 4. Split panes maintain independent session state.
 5. The collapsed ring reaches 100% at the document bottom.
 6. Clicking the icon performs a continuous circle-to-panel morph.
-7. The expanded panel lists H1 and H2 headings in document order.
+7. The expanded panel lists H1-H4 headings in document order with 16 px of indentation per level.
 8. Active highlighting changes at the 35% viewport threshold.
 9. Duplicate heading names navigate to the correct heading instance.
 10. Navigation and expansion respect reduced-motion preferences.
 11. Switching notes preserves enabled state but collapses and rebuilds the
-    outliner.
+    outline.
 12. Notes without headings show a disabled control and explanatory tooltip.
 13. Unloading the plugin removes every overlay, React root, listener, observer,
     and scheduled animation frame.
