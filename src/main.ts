@@ -48,7 +48,7 @@ export default class SlickOutlinePlugin extends Plugin {
 
     this.addSettingTab(new SlickOutlineSettingTab(this));
     this.addCommand({
-      id: 'show-slick-outline',
+      id: 'show-outline',
       name: 'Show outline',
       checkCallback: (checking) => {
         const view = this.app.workspace.getActiveViewOfType(MarkdownView);

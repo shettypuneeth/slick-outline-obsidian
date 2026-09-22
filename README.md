@@ -108,6 +108,12 @@ The source is organized into pane lifecycle and DOM integration under
 `src/views/`, React presentation under `src/components/`, and navigation,
 geometry, progress, and editor adapters under `src/slick-outline/`.
 
+## Support
+
+If you've found SlickOutline useful, consider buying me a coffee. Thanks for your support
+
+[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/pshetty)
+
 ## Feedback
 
 Report bugs or suggest improvements through

@@ -1,4 +1,4 @@
-import { Notice, PluginSettingTab, Setting } from 'obsidian';
+import { Notice, PluginSettingTab, type SettingDefinitionItem } from 'obsidian';
 import type SlickOutlinePlugin from './main';
 import type { RelativePosition } from './slick-outline/geometry';
 import { DEFAULT_READING_SPEED_WPM, isReadingSpeedWpm } from './slick-outline/readingTime';
@@ -47,96 +47,92 @@ export class SlickOutlineSettingTab extends PluginSettingTab {
     super(plugin.app, plugin);
   }
 
-  display(): void {
-    this.containerEl.empty();
-    new Setting(this.containerEl)
-      .setName('Reading speed')
-      .setDesc(`Words per minute used for reading-time estimates (default: ${DEFAULT_READING_SPEED_WPM}).`)
-      .addText((text) => {
-        const input = text.inputEl;
-        input.type = 'number';
-        input.min = '1';
-        input.max = String(Number.MAX_SAFE_INTEGER);
-        input.step = '1';
-        input.setAttribute('aria-label', 'Reading speed (words per minute)');
-        text.setValue(String(this.plugin.settings.readingSpeedWpm));
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    const placementOptions: Record<string, string> = {
+      'top-left': 'Top left',
+      'top-right': 'Top right',
+      'bottom-left': 'Bottom left',
+      'bottom-right': 'Bottom right',
+    };
+    if (this.plugin.settings.customPosition) placementOptions.custom = 'Custom position';
 
-        // Commit a complete value, rather than saving each intermediate keystroke.
-        input.addEventListener('input', () => input.setCustomValidity(''));
-        input.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter') {
-            event.preventDefault();
-            input.blur();
-          }
-        });
-        input.addEventListener('change', () => {
-          const readingSpeedWpm = input.valueAsNumber;
-          if (!isReadingSpeedWpm(readingSpeedWpm)) {
-            input.setCustomValidity('Enter a positive whole number of words per minute.');
-            input.reportValidity();
-            return;
-          }
-          input.setCustomValidity('');
-          if (readingSpeedWpm === this.plugin.settings.readingSpeedWpm) return;
+    return [
+      {
+        name: 'Reading speed',
+        desc: `Words per minute used for reading-time estimates (default: ${DEFAULT_READING_SPEED_WPM}).`,
+        control: {
+          type: 'number',
+          key: 'readingSpeedWpm',
+          defaultValue: DEFAULT_READING_SPEED_WPM,
+          min: 1,
+          max: Number.MAX_SAFE_INTEGER,
+          step: 1,
+          validate: (value) => isReadingSpeedWpm(value)
+            ? undefined : 'Enter a positive whole number of words per minute.',
+        },
+      },
+      {
+        name: 'Placement',
+        desc: 'Choose a corner, or drag the collapsed circle to a custom position.',
+        control: {
+          type: 'dropdown',
+          key: 'placement',
+          options: placementOptions,
+        },
+      },
+      {
+        name: 'Reset to defaults',
+        desc: `Restore the top-left position and default reading speed (${DEFAULT_READING_SPEED_WPM} words per minute) in all panes.`,
+        render: (setting) => {
+          setting.addButton((button) => button
+            .setButtonText('Reset to defaults')
+            .setCta()
+            .onClick(async () => {
+              button.setDisabled(true);
+              await this.plugin.resetSettings().then(
+                () => this.update(),
+                (error: unknown) => {
+                  button.setDisabled(false);
+                  console.error('SlickOutline could not reset its settings.', error);
+                  new Notice('Could not reset the outline settings. Please try again.');
+                },
+              );
+            }));
+        },
+      },
+    ];
+  }
 
-          text.setDisabled(true);
-          void this.plugin.setReadingSpeedWpm(readingSpeedWpm).then(
-            () => text.setValue(String(this.plugin.settings.readingSpeedWpm)).setDisabled(false),
-            (error: unknown) => {
-              text.setValue(String(this.plugin.settings.readingSpeedWpm)).setDisabled(false);
-              console.error('SlickOutline could not save its reading speed.', error);
-              new Notice('Could not save the reading speed. Please try again.');
-            },
-          );
-        });
+  getControlValue(key: string): unknown {
+    if (key === 'readingSpeedWpm') return this.plugin.settings.readingSpeedWpm;
+    if (key === 'placement') {
+      return this.plugin.settings.customPosition ? 'custom' : this.plugin.settings.placement;
+    }
+    return undefined;
+  }
+
+  async setControlValue(key: string, value: unknown): Promise<void> {
+    if (key === 'readingSpeedWpm') {
+      if (!isReadingSpeedWpm(value) || value === this.plugin.settings.readingSpeedWpm) return;
+      await this.plugin.setReadingSpeedWpm(value).catch((error: unknown) => {
+        this.update();
+        console.error('SlickOutline could not save its reading speed.', error);
+        new Notice('Could not save the reading speed. Please try again.');
       });
+      return;
+    }
 
-    new Setting(this.containerEl)
-      .setName('Placement')
-      .setDesc('Choose a corner, or drag the collapsed circle to a custom position.')
-      .addDropdown((dropdown) => {
-        dropdown
-          .addOption('top-left', 'Top left')
-          .addOption('top-right', 'Top right')
-          .addOption('bottom-left', 'Bottom left')
-          .addOption('bottom-right', 'Bottom right');
-        if (this.plugin.settings.customPosition) {
-
-          // Custom is a status indicator; choosing a preset clears the dragged position.
-          dropdown.addOption('custom', 'Custom position');
-          const option = dropdown.selectEl.querySelector<HTMLOptionElement>('option[value="custom"]');
-          if (option) option.disabled = true;
-        }
-        const previousSelection = this.plugin.settings.customPosition ? 'custom' : this.plugin.settings.placement;
-        dropdown.setValue(previousSelection).onChange(async (value) => {
-          if (!isPlacement(value)) throw new Error(`Invalid outline placement: ${value}`);
-          dropdown.setDisabled(true);
-          await this.plugin.setPlacement(value).then(
-            () => this.display(),
-            (error: unknown) => {
-              dropdown.setValue(previousSelection).setDisabled(false);
-              console.error('SlickOutline could not save its placement.', error);
-              new Notice('Could not save the outline placement. Please try again.');
-            },
-          );
-        });
-      });
-    new Setting(this.containerEl)
-      .setName('Reset to defaults')
-      .setDesc(`Restore the top-left position and default reading speed (${DEFAULT_READING_SPEED_WPM} words per minute) in all panes.`)
-      .addButton((button) => button
-        .setButtonText('Reset to defaults')
-        .setCta()
-        .onClick(async () => {
-          button.setDisabled(true);
-          await this.plugin.resetSettings().then(
-            () => this.display(),
-            (error: unknown) => {
-              button.setDisabled(false);
-              console.error('SlickOutline could not reset its settings.', error);
-              new Notice('Could not reset the outline settings. Please try again.');
-            },
-          );
-        }));
+    if (key === 'placement') {
+      if (value === 'custom' && this.plugin.settings.customPosition) return;
+      if (!isPlacement(value)) throw new TypeError(`Invalid outline placement: ${String(value)}`);
+      await this.plugin.setPlacement(value).then(
+        () => this.update(),
+        (error: unknown) => {
+          this.update();
+          console.error('SlickOutline could not save its placement.', error);
+          new Notice('Could not save the outline placement. Please try again.');
+        },
+      );
+    }
   }
 }

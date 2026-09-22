@@ -1,7 +1,7 @@
 {
   "id": "slick-outline",
   "name": "SlickOutline",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "1.13.0",
   "description": "Navigate note headings with a floating glass outline and reading-progress ring.",
   "author": "Puneeth Shetty",

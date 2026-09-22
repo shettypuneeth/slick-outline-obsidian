@@ -16,7 +16,7 @@ import { HeadingNavigator } from '../slick-outline/HeadingNavigator';
 import type { SlickOutlinePlacement, SlickOutlineSettings } from '../settings';
 import { attachDraggable, type DragController, type DragPoint } from '../utils/draggable';
 
-type OwnerWindow = Window & typeof globalThis;
+type OwnerWindow = Window & typeof window;
 
 interface PaneLayout {
   paneRect: DOMRect;
