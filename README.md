@@ -21,6 +21,16 @@ permanent sidebar.
 
 ![SlickOutline navigation and placement demo](assets/slick-outline.gif)
 
+If you've found SlickOutline useful, please consider [☕️ Buying me a coffee](https://buymeacoffee.com/pshetty)
+
+## Installation
+
+Once SlickOutline is available in the Obsidian Community Plugins directory:
+
+1. Open **Settings -> Community plugins**.
+2. Select **Browse** and search for **SlickOutline**.
+3. Install and enable the plugin.
+
 ## Getting started
 
 1. Enable **SlickOutline** in Obsidian's Community plugins settings.
@@ -69,50 +79,6 @@ of 200 words per minute.
 - The outline remains open while scrolling or navigating between headings.
 - Placement and reading speed are shared settings, while outline visibility is
   managed independently for each pane.
-
-## Installation
-
-### Community plugins
-
-Once SlickOutline is available in the Obsidian Community Plugins directory:
-
-1. Open **Settings -> Community plugins**.
-2. Select **Browse** and search for **SlickOutline**.
-3. Install and enable the plugin.
-
-### Manual installation
-
-Download `main.js`, `manifest.json`, and `styles.css` from the latest GitHub
-release. Place them in:
-
-```text
-<your-vault>/.obsidian/plugins/slick-outline/
-```
-
-Reload Obsidian, then enable **SlickOutline** under **Community plugins**.
-
-## Development
-
-From the plugin directory:
-
-```sh
-npm install
-npm run build
-```
-
-`npm run build` runs the strict TypeScript check and creates the production
-`main.js` bundle. Use `npm run dev` to rebuild continuously during local
-development.
-
-The source is organized into pane lifecycle and DOM integration under
-`src/views/`, React presentation under `src/components/`, and navigation,
-geometry, progress, and editor adapters under `src/slick-outline/`.
-
-## Support
-
-If you've found SlickOutline useful, consider buying me a coffee. Thanks for your support
-
-[![Buy Me a Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://buymeacoffee.com/pshetty)
 
 ## Feedback
 

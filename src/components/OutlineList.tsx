@@ -61,6 +61,7 @@ export function OutlineList({ expanded, headings, active, shellRef, onNavigate }
                 type="button"
                 className="slick-outline-heading"
                 data-level={heading.level}
+                data-depth={heading.depth}
                 aria-current={index === active ? 'location' : undefined}
                 title={heading.label}
                 tabIndex={expanded ? 0 : -1}

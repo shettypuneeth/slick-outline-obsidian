@@ -4,6 +4,7 @@ export interface OutlineHeading {
   id: string;
   label: string;
   level: 1 | 2 | 3 | 4;
+  depth: number;
   line: number;
   from: number;
   to: number;
@@ -42,6 +43,8 @@ export function buildOutline(source: string): OutlineSnapshot {
 
   const headings: OutlineHeading[] = [];
   const excludedCodeRanges: { from: number; to: number }[] = [];
+  const ancestorLevels: OutlineHeading['level'][] = [];
+  let blockquoteDepth = 0;
 
   const lineStartOffsets = [0];
   for (let offset = 0; offset < maskedSource.length; offset++) {
@@ -62,26 +65,43 @@ export function buildOutline(source: string): OutlineSnapshot {
 
   tree.iterate({
     enter(node) {
+      if (node.name === 'Blockquote') {
+        blockquoteDepth++;
+        return;
+      }
       if (node.name === 'FencedCode' || node.name === 'CodeBlock') {
         excludedCodeRanges.push({ from: node.from, to: node.to });
         return false;
       }
       if (!/^(ATX|Setext)Heading[1-4]$/.test(node.name)) return;
+
+      // Obsidian excludes blockquote and callout headings from its document outline.
+      if (blockquoteDepth > 0) return false;
+
       const rawHeading = maskedSource.slice(node.from, node.to);
       const title = node.name.startsWith('ATX')
         ? rawHeading.replace(/^ {0,3}#{1,4}(?:[ \t]+|$)/, '').replace(/[ \t]+#+[ \t]*$/, '')
         : rawHeading.replace(/\r?\n[ \t]*[=-]+[ \t]*$/, '');
+      const level: OutlineHeading['level'] = node.name.endsWith('1') ? 1
+        : node.name.endsWith('2') ? 2
+        : node.name.endsWith('3') ? 3 : 4;
+      while (ancestorLevels.length > 0 && ancestorLevels.at(-1)! >= level) {
+        ancestorLevels.pop();
+      }
       headings.push({
         id: `heading-${node.from}`,
         label: headingLabel(title) || 'Untitled heading',
-        level: node.name.endsWith('1') ? 1
-          : node.name.endsWith('2') ? 2
-          : node.name.endsWith('3') ? 3 : 4,
+        level,
+        depth: ancestorLevels.length,
         line: lineAt(node.from),
         from: node.from,
         to: node.to,
       });
+      ancestorLevels.push(level);
       return false;
+    },
+    leave(node) {
+      if (node.name === 'Blockquote') blockquoteDepth--;
     },
   });
 

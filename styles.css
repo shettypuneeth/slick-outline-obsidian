@@ -334,7 +334,7 @@
   box-sizing: border-box;
   height: auto;
   min-height: 30px;
-  padding: 4px 8px 4px calc(12px + var(--slick-outline-heading-indent, 0px));
+  padding: 4px 8px 4px calc(16px + var(--slick-outline-heading-indent, 0px));
   border-radius: 0 5px 5px 0;
   text-align: left;
   white-space: normal;
@@ -346,15 +346,15 @@
 }
 
 /* Indent the whole text block so wrapped lines align without moving the shared rail. */
-.slick-outline-host .slick-outline-heading[data-level="2"] {
+.slick-outline-host .slick-outline-heading[data-depth="1"] {
   --slick-outline-heading-indent: 16px;
 }
 
-.slick-outline-host .slick-outline-heading[data-level="3"] {
+.slick-outline-host .slick-outline-heading[data-depth="2"] {
   --slick-outline-heading-indent: 32px;
 }
 
-.slick-outline-host .slick-outline-heading[data-level="4"] {
+.slick-outline-host .slick-outline-heading[data-depth="3"] {
   --slick-outline-heading-indent: 48px;
 }
 
