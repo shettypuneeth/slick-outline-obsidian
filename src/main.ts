@@ -15,8 +15,10 @@ import { isReadingSpeedWpm } from './slick-outline/readingTime';
 export default class SlickOutlinePlugin extends Plugin {
   settings = { ...DEFAULT_SETTINGS };
 
-  // Only panes explicitly enabled through the command own an overlay.
+  // Only panes enabled through the command, or by the automatic setting, own an overlay.
   private readonly panes = new Map<WorkspaceLeaf, SlickOutlineView>();
+  private readonly autoShownLeaves = new WeakSet<WorkspaceLeaf>();
+  private dismissedLeaves = new WeakSet<WorkspaceLeaf>();
 
   // Shared adapters provide source positions for Live Preview and Reading View.
   private bridge!: EditorBridge;
@@ -66,7 +68,12 @@ export default class SlickOutlinePlugin extends Plugin {
           if (existingPane) {
             existingPane.destroy();
             this.panes.delete(view.leaf);
+
+            // A hidden Source Mode overlay is recreated rather than dismissed, so it returns in Live Preview.
+            if (this.settings.showAutomatically && isSupportedMode) this.dismissedLeaves.add(view.leaf);
           } else {
+            this.dismissedLeaves.delete(view.leaf);
+            this.autoShownLeaves.delete(view.leaf);
             this.panes.set(view.leaf, new SlickOutlineView(
               view, this.bridge, this.readingHeadings, () => this.settings,
               (position) => this.savePosition(position),
@@ -80,6 +87,9 @@ export default class SlickOutlinePlugin extends Plugin {
     this.registerEvent(this.app.workspace.on('layout-change', () => this.syncPanes()));
     this.registerEvent(this.app.workspace.on('active-leaf-change', () => this.syncPanes()));
     this.registerEvent(this.app.workspace.on('file-open', () => this.syncPanes()));
+    this.app.workspace.onLayoutReady(() => {
+      if (!this.unloading) this.syncPanes();
+    });
 
     this.registerEvent(this.app.metadataCache.on('changed', (file) => {
       for (const pane of this.panes.values()) {
@@ -99,7 +109,7 @@ export default class SlickOutlinePlugin extends Plugin {
     return this.writeSettings({ placement, customPosition: null });
   }
 
-  /** Cancels active drags and restores default placement and reading speed across enabled panes. */
+  /** Cancels active drags, restores default placement and reading speed, and turns off automatic outlines. */
   resetSettings(): Promise<void> {
     for (const pane of this.panes.values()) pane.cancelDrag();
     return this.writeSettings({ ...DEFAULT_SETTINGS });
@@ -111,6 +121,12 @@ export default class SlickOutlinePlugin extends Plugin {
       return Promise.reject(new RangeError('Reading speed must be a positive whole number of words per minute.'));
     }
     return this.writeSettings({ readingSpeedWpm });
+  }
+
+  /** Adds or removes automatic outlines; turning them on again restores panes dismissed through the command. */
+  setShowAutomatically(showAutomatically: boolean): Promise<void> {
+    if (showAutomatically) this.dismissedLeaves = new WeakSet();
+    return this.writeSettings({ showAutomatically });
   }
 
   /** Serializes disk writes and publishes successful settings to panes in the same order. */
@@ -134,7 +150,7 @@ export default class SlickOutlinePlugin extends Plugin {
 
   /**
    * Reconciles registered overlays with the workspace, disposing closed or replaced views.
-   * New Markdown panes remain untouched until explicitly enabled through the command.
+   * New Markdown panes remain untouched until enabled through the command or the automatic setting.
    */
   private syncPanes(): void {
     const liveLeaves = new Set(this.app.workspace.getLeavesOfType('markdown'));
@@ -142,11 +158,29 @@ export default class SlickOutlinePlugin extends Plugin {
     for (const [leaf, pane] of this.panes) {
 
       // Obsidian can reuse a leaf with a replacement view, leaving the old overlay stale.
-      if (!liveLeaves.has(leaf) || leaf.view !== pane.view) {
+      if (!liveLeaves.has(leaf) || leaf.view !== pane.view ||
+        (!this.settings.showAutomatically && this.autoShownLeaves.has(leaf))) {
         pane.destroy();
         this.panes.delete(leaf);
       } else {
         pane.sync();
+      }
+    }
+
+    if (!this.settings.showAutomatically) return;
+    for (const leaf of liveLeaves) {
+
+      // Deferred tabs have no MarkdownView until opened.
+      if (this.panes.has(leaf) || this.dismissedLeaves.has(leaf) ||
+        !(leaf.view instanceof MarkdownView) || !leaf.view.file) continue;
+      try {
+        this.panes.set(leaf, new SlickOutlineView(
+          leaf.view, this.bridge, this.readingHeadings, () => this.settings,
+          (position) => this.savePosition(position),
+        ));
+        this.autoShownLeaves.add(leaf);
+      } catch (error) {
+        console.error('SlickOutline could not show the outline automatically.', error);
       }
     }
   }

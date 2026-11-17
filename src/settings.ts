@@ -9,12 +9,14 @@ export interface SlickOutlineSettings {
   placement: SlickOutlinePlacement;
   customPosition: RelativePosition | null;
   readingSpeedWpm: number;
+  showAutomatically: boolean;
 }
 
 export const DEFAULT_SETTINGS: Readonly<SlickOutlineSettings> = {
   placement: 'top-left',
   customPosition: null,
   readingSpeedWpm: DEFAULT_READING_SPEED_WPM,
+  showAutomatically: false,
 };
 
 export function isPlacement(value: unknown): value is SlickOutlinePlacement {
@@ -39,6 +41,8 @@ export function readSettings(data: unknown): SlickOutlineSettings {
     customPosition,
     readingSpeedWpm: 'readingSpeedWpm' in savedSettings && isReadingSpeedWpm(savedSettings.readingSpeedWpm)
       ? savedSettings.readingSpeedWpm : DEFAULT_SETTINGS.readingSpeedWpm,
+    showAutomatically: 'showAutomatically' in savedSettings && typeof savedSettings.showAutomatically === 'boolean'
+      ? savedSettings.showAutomatically : DEFAULT_SETTINGS.showAutomatically,
   };
 }
 
@@ -57,6 +61,14 @@ export class SlickOutlineSettingTab extends PluginSettingTab {
     if (this.plugin.settings.customPosition) placementOptions.custom = 'Custom position';
 
     return [
+      {
+        name: 'Show outline automatically',
+        desc: 'Add the outline to every Markdown pane. Running the command still removes it from one pane.',
+        control: {
+          type: 'toggle',
+          key: 'showAutomatically',
+        },
+      },
       {
         name: 'Reading speed',
         desc: `Words per minute used for reading-time estimates (default: ${DEFAULT_READING_SPEED_WPM}).`,
@@ -82,7 +94,7 @@ export class SlickOutlineSettingTab extends PluginSettingTab {
       },
       {
         name: 'Reset to defaults',
-        desc: `Restore the top-left position and default reading speed (${DEFAULT_READING_SPEED_WPM} words per minute) in all panes.`,
+        desc: `Restore the top-left position and default reading speed (${DEFAULT_READING_SPEED_WPM} words per minute) in all panes, and stop showing the outline automatically.`,
         render: (setting) => {
           setting.addButton((button) => button
             .setButtonText('Reset to defaults')
@@ -104,6 +116,7 @@ export class SlickOutlineSettingTab extends PluginSettingTab {
   }
 
   getControlValue(key: string): unknown {
+    if (key === 'showAutomatically') return this.plugin.settings.showAutomatically;
     if (key === 'readingSpeedWpm') return this.plugin.settings.readingSpeedWpm;
     if (key === 'placement') {
       return this.plugin.settings.customPosition ? 'custom' : this.plugin.settings.placement;
@@ -112,6 +125,16 @@ export class SlickOutlineSettingTab extends PluginSettingTab {
   }
 
   async setControlValue(key: string, value: unknown): Promise<void> {
+    if (key === 'showAutomatically') {
+      if (typeof value !== 'boolean' || value === this.plugin.settings.showAutomatically) return;
+      await this.plugin.setShowAutomatically(value).catch((error: unknown) => {
+        this.update();
+        console.error('SlickOutline could not save its automatic outline setting.', error);
+        new Notice('Could not save the automatic outline setting. Please try again.');
+      });
+      return;
+    }
+
     if (key === 'readingSpeedWpm') {
       if (!isReadingSpeedWpm(value) || value === this.plugin.settings.readingSpeedWpm) return;
       await this.plugin.setReadingSpeedWpm(value).catch((error: unknown) => {

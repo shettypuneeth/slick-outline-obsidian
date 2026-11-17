@@ -48,6 +48,13 @@ enabled but collapses it.
 
 ## Customize the outline
 
+### Show automatically
+
+Turn on **Settings -> SlickOutline -> Show outline automatically** to add the
+outline to every Markdown pane. Running the command on a pane still removes it
+from that pane, and it stays off when you open another note there until you run
+the command again. Turning the setting off removes only the outlines it added.
+
 ### Placement
 
 Choose **Top left**, **Top right**, **Bottom left**, or **Bottom right** under
@@ -66,7 +73,7 @@ the reading time for the current note while excluding frontmatter and code
 blocks.
 
 Use **Reset to defaults** to restore the top-left placement and a reading speed
-of 200 words per minute.
+of 200 words per minute, and to turn off **Show outline automatically**.
 
 ## Compatibility and behavior
 
@@ -77,8 +84,8 @@ of 200 words per minute.
 - Heading labels and reading time refresh when the panel reopens rather than
   after every edit.
 - The outline remains open while scrolling or navigating between headings.
-- Placement and reading speed are shared settings, while outline visibility is
-  managed independently for each pane.
+- Placement, reading speed, and automatic display are shared settings, while
+  outline visibility can still be changed for each pane.
 
 ## Feedback
 
